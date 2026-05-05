@@ -1,0 +1,47 @@
+# GPU-enabled Dockerfile using CUDA base image
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04 AS production
+
+LABEL maintainer="PDD Medical AI Platform"
+LABEL version="1.0.0-gpu"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Install Python 3.11 and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3.11-dev \
+    python3-pip \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN ln -sf python3.11 /usr/bin/python && ln -sf pip3 /usr/bin/pip
+
+WORKDIR /app
+
+RUN pip install --no-cache-dir --upgrade pip
+
+COPY requirements.txt .
+# Install PyTorch with CUDA 12.1 support
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu121 && \
+    pip install --no-cache-dir -r requirements.txt
+
+RUN useradd -m -u 1000 appuser
+
+COPY app/ ./app/
+COPY scripts/ ./scripts/
+
+RUN mkdir -p /tmp/pdd_processing /app/checkpoints && \
+    chown -R appuser:appuser /app /tmp/pdd_processing
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

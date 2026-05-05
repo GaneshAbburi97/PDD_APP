@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdd-api
+    restart: unless-stopped
+    environment:
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-medical-processor-prod}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET:-medical-processor-prod.appspot.com}
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/service-account.json
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+      - DEBUG=${DEBUG:-false}
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-4}
+      - MODEL_DEVICE=${MODEL_DEVICE:-cpu}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - ./secrets:/secrets:ro
+      - ./checkpoints:/app/checkpoints:ro
+      - pdd_temp:/tmp/pdd_processing
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - pdd-network
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: pdd-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - pdd-network
+
+volumes:
+  pdd_temp:
+
+networks:
+  pdd-network:
+    driver: bridge
