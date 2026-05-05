@@ -9,22 +9,32 @@ import retrofit2.http.*
 
 /**
  * Retrofit API Service for medical file processing.
- * 
- * Provides endpoints for authentication, file processing, and status tracking.
+ *
+ * Provides endpoints for authentication, file processing, status tracking,
+ * and backend health monitoring.
  * All functions are suspended for use with Kotlin Coroutines.
  */
 interface ApiService {
+
+    // --- Health ---
+
+    /**
+     * Ping the local FastAPI backend.
+     * Used to detect whether the backend is reachable before submitting work.
+     */
+    @GET("health")
+    suspend fun healthCheck(): Response<HealthResponse>
 
     // --- Authentication ---
 
     @POST("auth/login")
     suspend fun login(
-        @Body request: LoginRequest
+        @Body request: LoginRequest,
     ): Response<ApiResponse<User>>
 
     @POST("auth/register")
     suspend fun register(
-        @Body request: RegisterRequest
+        @Body request: RegisterRequest,
     ): Response<ApiResponse<User>>
 
     // --- File Processing ---
@@ -35,7 +45,7 @@ interface ApiService {
     @Multipart
     @POST("upload")
     suspend fun uploadFile(
-        @Part file: MultipartBody.Part
+        @Part file: MultipartBody.Part,
     ): Response<ApiResponse<UploadResponse>>
 
     /**
@@ -43,7 +53,7 @@ interface ApiService {
      */
     @POST("process")
     suspend fun startProcessing(
-        @Body request: ProcessRequest
+        @Body request: ProcessRequest,
     ): Response<ApiResponse<ProcessResponse>>
 
     // --- Results & Status ---
@@ -53,7 +63,7 @@ interface ApiService {
      */
     @GET("process/status/{jobId}")
     suspend fun getJobStatus(
-        @Path("jobId") jobId: String
+        @Path("jobId") jobId: String,
     ): Response<ApiResponse<ProcessingJob>>
 
     /**
@@ -61,20 +71,44 @@ interface ApiService {
      */
     @GET("process/result/{jobId}")
     suspend fun getProcessingResult(
-        @Path("jobId") jobId: String
+        @Path("jobId") jobId: String,
     ): Response<ApiResponse<ProcessingResult>>
+
+    // --- Job Management ---
+
+    /**
+     * Cancel an in-progress job
+     */
+    @POST("process/cancel/{jobId}")
+    suspend fun cancelJob(
+        @Path("jobId") jobId: String,
+    ): Response<ApiResponse<Unit>>
+
+    /**
+     * Retry a failed job
+     */
+    @POST("process/retry/{jobId}")
+    suspend fun retryJob(
+        @Path("jobId") jobId: String,
+    ): Response<ApiResponse<ProcessResponse>>
 }
 
-/**
- * Data Transfer Objects (DTOs) for API Requests and Responses
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// Data Transfer Objects (DTOs) for API Requests and Responses
+// ─────────────────────────────────────────────────────────────────────────────
+
+data class HealthResponse(
+    val status: String,
+    val version: String? = null,
+    val modelLoaded: Boolean = false,
+)
 
 data class LoginRequest(val email: String, val password: String)
 
 data class RegisterRequest(
-    val email: String, 
-    val password: String, 
-    val displayName: String
+    val email: String,
+    val password: String,
+    val displayName: String,
 )
 
 data class ProcessRequest(
@@ -82,16 +116,16 @@ data class ProcessRequest(
     val fileName: String,
     val fileSize: Long,
     val cloudProvider: String,
-    val userEmail: String
+    val userEmail: String,
 )
 
 data class ProcessResponse(
-    val jobId: String, 
+    val jobId: String,
     val estimatedTimeSeconds: Int,
-    val status: String
+    val status: String,
 )
 
 data class UploadResponse(
     val fileUrl: String,
-    val fileName: String
+    val fileName: String,
 )
