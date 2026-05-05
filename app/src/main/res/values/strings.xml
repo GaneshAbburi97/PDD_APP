@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Info -->
+    <string name="app_name">Medical File Processor</string>
+
+    <!-- Login Screen -->
+    <string name="login_welcome">Welcome Back</string>
+    <string name="login_subtitle">Log in to process your medical files.</string>
+    <string name="email_label">Email Address</string>
+    <string name="password_label">Password</string>
+    <string name="login_button">Login</string>
+    <string name="no_account_link">Don\'t have an account? Create one</string>
+    <string name="login_failed">Login failed: %s</string>
+
+    <!-- Register Screen -->
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join us to start processing medical files.</string>
+    <string name="full_name_label">Full Name</string>
+    <string name="register_button">Register</string>
+    <string name="have_account_link">Already have an account? Log in</string>
+    <string name="registration_failed">Registration failed: %s</string>
+
+    <!-- Upload Screen -->
+    <string name="upload_screen_title">Process Medical Scan</string>
+    <string name="upload_screen_subtitle">Select a NIfTI (.nii or .nii.gz) file to begin analysis.</string>
+    <string name="select_file">Select Medical File</string>
+    <string name="selected_file_label">Selected: %s</string>
+    <string name="start_processing_button">Start Processing</string>
+    <string name="preparing_analysis">Preparing for AI analysis&#8230;</string>
+    <string name="upload_error">Upload failed: %s</string>
+    <string name="uploading_label">Uploading: %s</string>
+
+    <!-- Processing Screen -->
+    <string name="processing_in_progress">AI Analysis in Progress</string>
+    <string name="connecting_server">Connecting to server&#8230;</string>
+    <string name="status_check_error">Error checking status: %s</string>
+    <string name="retry_button">Retry</string>
+
+    <!-- Result Screen -->
+    <string name="results_title">Analysis Results</string>
+    <string name="job_id_label">Job ID: %s</string>
+    <string name="model_findings_title">Model Findings</string>
+    <string name="download_processed_file">Download Processed NIfTI File</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
+    <string name="fetching_results">Fetching analysis data&#8230;</string>
+    <string name="load_results_error">Failed to load results: %s</string>
+
+    <!-- Components: ResultViewer -->
+    <string name="nifti_output_preview">Processed NIfTI Output</string>
+    <string name="view_analysis_button">View Analysis</string>
+    <string name="ai_findings_metadata">AI Findings &amp; Metadata</string>
+    <string name="no_metadata_available">No additional metadata available.</string>
+    <string name="result_id_label">Result ID</string>
+
+    <!-- Components: StatusCard -->
+    <string name="unknown_file">Unknown File</string>
+    <string name="status_label">Status: %s</string>
+
+    <!-- Common -->
+    <string name="loading">Loading&#8230;</string>
+</resources>
