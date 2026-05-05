@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: medical_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount Firebase credentials file at runtime
+      - ./firebase-credentials.json:/backend/firebase-credentials.json:ro
+      # Mount model checkpoints
+      - ./models:/backend/models:ro
+      # Persistent temp storage
+      - medical_tmp:/tmp/medical_processor
+    environment:
+      - DEBUG=true
+      - FIREBASE_CREDENTIALS_PATH=/backend/firebase-credentials.json
+      - INFERENCE_DEVICE=cpu
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  medical_tmp:

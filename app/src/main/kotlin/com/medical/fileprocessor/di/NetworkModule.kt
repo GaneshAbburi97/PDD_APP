@@ -18,10 +18,15 @@ import javax.inject.Singleton
 /**
  * Hilt module for Network dependencies.
  * Provides singleton instances of Retrofit and OkHttpClient.
- * 
+ *
+ * Supports three backend environments (configured via [Constants.ACTIVE_BACKEND_ENV]):
+ *  - EMULATOR    → http://10.0.2.2:8000/ (AVD → host machine)
+ *  - LOCAL_DEVICE → http://<LAN-IP>:8000/ (physical device on same Wi-Fi)
+ *  - CLOUD        → Firebase Cloud Functions URL
+ *
  * Interceptor chain (in order):
  * 1. FirebaseAuthInterceptor - adds authentication token
- * 2. HttpLoggingInterceptor - logs request/response (debug only)
+ * 2. HttpLoggingInterceptor  - logs request/response (debug only)
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,7 +34,7 @@ object NetworkModule {
 
     /**
      * Provides HTTP logging interceptor.
-     * 
+     *
      * In debug: Logs full request/response bodies
      * In release: Logging is disabled for performance
      */
@@ -47,25 +52,25 @@ object NetworkModule {
 
     /**
      * Provides Firebase authentication interceptor.
-     * 
-     * Adds Firebase ID token to every request.
-     * This authenticates the request to the backend.
+     *
+     * Adds Firebase ID token to every request so the backend can
+     * verify the caller's identity.
      */
     @Provides
     @Singleton
     fun provideFirebaseAuthInterceptor(
-        firebaseAuth: FirebaseAuth
+        firebaseAuth: FirebaseAuth,
     ): FirebaseAuthInterceptor {
         return FirebaseAuthInterceptor(firebaseAuth)
     }
 
     /**
      * Provides OkHttpClient with custom configuration.
-     * 
+     *
      * Configuration:
      * - Firebase auth interceptor (adds token)
      * - Logging interceptor (debug only)
-     * - 30 second timeouts for all operations
+     * - Extended timeouts for local CPU inference (60 s read/write)
      * - Connection pooling for efficiency
      */
     @Provides
@@ -75,25 +80,21 @@ object NetworkModule {
         firebaseAuthInterceptor: FirebaseAuthInterceptor,
     ): OkHttpClient {
         return OkHttpClient.Builder()
-            // Add Firebase auth first (most important)
             .addInterceptor(firebaseAuthInterceptor)
-            // Add logging last (to see final request with auth)
             .addInterceptor(loggingInterceptor)
-            // Timeouts
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            // Connection pooling
+            // Increased for local CPU inference which can take 5–15 s per image
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             .connectionPool(okhttp3.ConnectionPool(5, 5, TimeUnit.MINUTES))
             .build()
     }
 
     /**
      * Provides Retrofit instance.
-     * 
-     * Base URL: Firebase Cloud Functions backend
-     * Converter: Gson for JSON serialization
-     * Client: OkHttpClient with auth interceptor
+     *
+     * Base URL is resolved from [Constants.resolveBaseUrl] so it automatically
+     * picks the correct host for emulator, physical device, or cloud.
      */
     @Provides
     @Singleton
@@ -101,7 +102,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient,
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Constants.FIREBASE_API_BASE_URL)
+            .baseUrl(Constants.resolveBaseUrl())
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -110,8 +111,8 @@ object NetworkModule {
     /**
      * Provides Retrofit API Service.
      *
-     * This is used to make API calls to the backend.
-     * Every call automatically includes Firebase auth token.
+     * Every call automatically includes the Firebase auth token via the
+     * [FirebaseAuthInterceptor].
      */
     @Provides
     @Singleton
