@@ -2,9 +2,7 @@ package com.medical.fileprocessor.repository
 
 import com.medical.fileprocessor.model.ProcessingJob
 import com.medical.fileprocessor.model.ProcessingResult
-import com.medical.fileprocessor.network.ProcessRequest
-import com.medical.fileprocessor.network.ProcessResponse
-import com.medical.fileprocessor.network.UploadResponse
+import com.medical.fileprocessor.network.*
 import com.medical.fileprocessor.util.Resource
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
@@ -13,6 +11,11 @@ import okhttp3.MultipartBody
  * Interface defining operations for medical file processing.
  */
 interface ProcessRepository {
+
+    /**
+     * Checks if the backend is online and responding.
+     */
+    fun checkBackendHealth(): Flow<Resource<HealthStatus>>
     
     /**
      * Uploads a file directly to the processing backend.

@@ -65,7 +65,8 @@ object NetworkModule {
      * Configuration:
      * - Firebase auth interceptor (adds token)
      * - Logging interceptor (debug only)
-     * - 30 second timeouts for all operations
+     * - Retry interceptor (handles transient failures)
+     * - 60 second timeouts for research-mode processing
      * - Connection pooling for efficiency
      */
     @Provides
@@ -77,12 +78,27 @@ object NetworkModule {
         return OkHttpClient.Builder()
             // Add Firebase auth first (most important)
             .addInterceptor(firebaseAuthInterceptor)
+            // Add retry interceptor for research stability
+            .addInterceptor { chain ->
+                var request = chain.request()
+                var response = chain.proceed(request)
+                var tryCount = 0
+                val maxLimit = 3
+
+                while (!response.isSuccessful && tryCount < maxLimit) {
+                    tryCount++
+                    Thread.sleep(2000L * tryCount) // Exponential backoff
+                    response.close()
+                    response = chain.proceed(request)
+                }
+                response
+            }
             // Add logging last (to see final request with auth)
             .addInterceptor(loggingInterceptor)
-            // Timeouts
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            // Increased timeouts for heavy AI processing
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
             // Connection pooling
             .connectionPool(okhttp3.ConnectionPool(5, 5, TimeUnit.MINUTES))
             .build()
@@ -91,9 +107,9 @@ object NetworkModule {
     /**
      * Provides Retrofit instance.
      * 
-     * Base URL: Firebase Cloud Functions backend
+     * Base URL: Configurable via Constants (PROD/EMULATOR/DEVICE)
      * Converter: Gson for JSON serialization
-     * Client: OkHttpClient with auth interceptor
+     * Client: OkHttpClient with auth + retry
      */
     @Provides
     @Singleton
@@ -101,7 +117,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient,
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(Constants.FIREBASE_API_BASE_URL)
+            .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

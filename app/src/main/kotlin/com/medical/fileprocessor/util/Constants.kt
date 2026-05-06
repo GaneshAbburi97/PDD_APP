@@ -26,7 +26,25 @@ object Constants {
     // =========================================================================
 
     const val FIREBASE_API_BASE_URL = "https://us-central1-medical-processor.cloudfunctions.net"
-    const val LOCAL_API_BASE_URL = "http://10.0.2.2:8000"
+    const val LOCAL_EMULATOR_API_BASE_URL = "http://10.0.2.2:8000"
+    const val LOCAL_DEVICE_API_BASE_URL = "http://192.168.1.100:8000" // Replace with your local IP
+
+    /**
+     * Environment selection for API.
+     */
+    enum class ApiEnvironment {
+        PROD,
+        EMULATOR,
+        DEVICE
+    }
+
+    private val CURRENT_ENVIRONMENT = ApiEnvironment.PROD
+
+    val BASE_URL = when (CURRENT_ENVIRONMENT) {
+        ApiEnvironment.PROD -> FIREBASE_API_BASE_URL
+        ApiEnvironment.EMULATOR -> LOCAL_EMULATOR_API_BASE_URL
+        ApiEnvironment.DEVICE -> LOCAL_DEVICE_API_BASE_URL
+    }
 
     // =========================================================================
     // FIREBASE CONFIGURATION

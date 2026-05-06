@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+      - FIREBASE_STORAGE_BUCKET=medical-processor-prod.appspot.com
+    volumes:
+      - ./service-account-key.json:/app/service-account-key.json
+      - ./temp_results:/app/temp_results
+    restart: always
+
+networks:
+  default:
+    name: medical-research-network

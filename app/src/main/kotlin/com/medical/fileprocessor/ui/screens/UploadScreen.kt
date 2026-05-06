@@ -20,6 +20,21 @@ import com.medical.fileprocessor.util.Resource
 import com.medical.fileprocessor.util.getFileName
 import com.medical.fileprocessor.viewmodel.UploadViewModel
 
+@Composable
+fun StatusBadge(label: String, isOnline: Boolean) {
+    Surface(
+        color = if (isOnline) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+        shape = MaterialTheme.shapes.small
+    ) {
+        Text(
+            text = "$label: ${if (isOnline) "Online" else "Offline"}",
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isOnline) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onErrorContainer
+        )
+    }
+}
+
 /**
  * Screen for selecting and uploading medical files for processing.
  * 
@@ -84,8 +99,17 @@ fun UploadScreen(
             Text(
                 text = stringResource(com.medical.fileprocessor.R.string.upload_screen_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 8.dp, bottom = 48.dp),
+                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
             )
+
+            // Research Mode Status Indicators
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatusBadge(label = "Network", isOnline = uiState.isNetworkAvailable)
+                StatusBadge(label = "Backend", isOnline = uiState.isBackendOnline)
+            }
 
             // Reusable File Picker Component
             FilePickerButton(
@@ -130,11 +154,11 @@ fun UploadScreen(
                 is Resource.Loading -> {
                     // Reusable Progress Bar Component
                     UploadProgressBar(
-                        progress = 0.5f, // Note: In a real app, bind to actual upload percentage
+                        progress = uiState.uploadProgress / 100f,
                         fileName = uiState.fileName ?: "",
                     )
                     Text(
-                        text = stringResource(com.medical.fileprocessor.R.string.preparing_analysis),
+                        text = if (uiState.uploadProgress < 100) "Uploading..." else "Waiting for backend...",
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(top = 8.dp),
                     )

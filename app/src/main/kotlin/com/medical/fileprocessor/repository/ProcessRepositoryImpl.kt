@@ -27,6 +27,26 @@ class ProcessRepositoryImpl @Inject constructor(
     private val firestoreJobRepository: FirestoreJobRepository
 ) : ProcessRepository {
 
+    /**
+     * Checks if the local/research backend is reachable and healthy.
+     */
+    fun checkBackendHealth(): Flow<Resource<HealthStatus>> = flow {
+        emit(Resource.Loading())
+        try {
+            val response = apiService.checkHealth()
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.data?.let {
+                    emit(Resource.Success(it))
+                } ?: emit(Resource.Error(Exception("Health data is null")))
+            } else {
+                emit(Resource.Error(Exception("Backend unreachable or unhealthy")))
+            }
+        } catch (e: Exception) {
+            Timber.tag("PROCESS").e(e, "❌ Health check failed")
+            emit(Resource.Error(e))
+        }
+    }
+
     override fun uploadFile(file: MultipartBody.Part): Flow<Resource<UploadResponse>> = flow {
         emit(Resource.Loading())
         try {

@@ -15,6 +15,11 @@ import retrofit2.http.*
  */
 interface ApiService {
 
+    // --- Health Check ---
+
+    @GET("health")
+    suspend fun checkHealth(): Response<ApiResponse<HealthStatus>>
+
     // --- Authentication ---
 
     @POST("auth/login")
@@ -68,6 +73,11 @@ interface ApiService {
 /**
  * Data Transfer Objects (DTOs) for API Requests and Responses
  */
+
+data class HealthStatus(
+    val status: String,
+    val version: String
+)
 
 data class LoginRequest(val email: String, val password: String)
 

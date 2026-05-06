@@ -29,6 +29,7 @@ fun ProcessingScreen(
     viewModel: ResultViewModel = hiltViewModel(),
 ) {
     val jobStatusState by viewModel.jobStatus.collectAsState()
+    val isNetworkAvailable by viewModel.isNetworkAvailable.collectAsState()
     val pollingCounter = remember { mutableIntStateOf(0) }
 
     // Defensive check for empty jobId
@@ -43,30 +44,16 @@ fun ProcessingScreen(
         return
     }
 
-    // Polling Logic with delay before first poll
+    // Start real-time listening
     LaunchedEffect(jobId) {
-        // Initial delay to ensure proper initialization
-        delay(500)
+        viewModel.startListeningToJob(jobId)
+    }
 
-        var attempts = 0
-        val maxAttempts = 1800 // Max 2.5 hours at 5s intervals
-
-        while (attempts < maxAttempts) {
-            viewModel.fetchJobStatus(jobId)
-            pollingCounter.value = attempts + 1
-
-            // Wait a bit for the state to update
-            delay(500)
-
-            // Check if status is completed
-            val currentStatus = jobStatusState?.dataOrNull?.status
-            if (currentStatus == ProcessingStatus.COMPLETED) {
-                onProcessingComplete(jobId)
-                return@LaunchedEffect
-            }
-
-            attempts++
-            delay(4500) // Total 5 second interval (500ms wait + 4500ms delay)
+    // Observation of status for navigation
+    LaunchedEffect(jobStatusState) {
+        val currentStatus = jobStatusState?.dataOrNull?.status
+        if (currentStatus == ProcessingStatus.COMPLETED) {
+            onProcessingComplete(jobId)
         }
     }
 
@@ -79,6 +66,19 @@ fun ProcessingScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
+            if (!isNetworkAvailable) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "⚠️ Offline: Check your connection",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+
             Text(
                 text = stringResource(com.medical.fileprocessor.R.string.processing_in_progress),
                 style = MaterialTheme.typography.headlineSmall,
@@ -89,16 +89,11 @@ fun ProcessingScreen(
             when (val resource = jobStatusState) {
                 is Resource.Success -> {
                     StatusCard(job = resource.data)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Poll attempt: ${pollingCounter.value}",
-                        style = MaterialTheme.typography.labelSmall
-                    )
                 }
                 is Resource.Loading -> {
                     CircularProgressIndicator()
                     Text(
-                        text = stringResource(com.medical.fileprocessor.R.string.connecting_server),
+                        text = resource.data?.status?.name ?: stringResource(com.medical.fileprocessor.R.string.connecting_server),
                         modifier = Modifier.padding(top = 16.dp),
                     )
                 }
@@ -108,7 +103,7 @@ fun ProcessingScreen(
                         color = MaterialTheme.colorScheme.error,
                     )
                     Button(
-                        onClick = { viewModel.fetchJobStatus(jobId) },
+                        onClick = { viewModel.startListeningToJob(jobId) },
                         modifier = Modifier.padding(top = 16.dp),
                     ) {
                         Text(stringResource(com.medical.fileprocessor.R.string.retry_button))
