@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <color name="background">#FEFBFF</color>
+    <color name="black">#000000</color>
+    <color name="error_red">#BA1A1A</color>
+    <color name="gray_100">#F5F5F5</color>
+    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_600">#757575</color>
+    <color name="gray_900">#212121</color>
+    <color name="info_blue">#0288D1</color>
+    <color name="medical_blue">#0056D2</color>
+    <color name="medical_dark_blue">#003D92</color>
+    <color name="medical_light_blue">#E8F1FF</color>
+    <color name="primary">#0056D2</color>
+    <color name="primary_container">#D9E2FF</color>
+    <color name="secondary">#585E71</color>
+    <color name="success_green">#2E7D32</color>
+    <color name="surface">#FEFBFF</color>
+    <color name="warning_orange">#FFA000</color>
+    <color name="white">#FFFFFF</color>
+    <string name="ai_findings_metadata">AI Findings &amp; Metadata</string>
+    <string name="app_name">Medical File Processor</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
+    <string name="com.google.firebase.crashlytics.mapping_file_id" ns1:ignore="UnusedResources,TypographyDashes" translatable="false">54bdcb8df3414b0086fc5e5084c335ee</string>
+    <string name="connecting_server">Connecting to server…</string>
+    <string name="download_processed_file">Download Processed NIfTI File</string>
+    <string name="email_label">Email Address</string>
+    <string name="fetching_results">Fetching analysis data…</string>
+    <string name="full_name_label">Full Name</string>
+    <string name="gcm_defaultSenderId" translatable="false">123456789012</string>
+    <string name="google_api_key" translatable="false">AIzaSyDummyKey_ReplaceWithActualKey</string>
+    <string name="google_app_id" translatable="false">1:123456789012:android:abcdef123456789</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDummyKey_ReplaceWithActualKey</string>
+    <string name="google_storage_bucket" translatable="false">medical-processor-prod.appspot.com</string>
+    <string name="have_account_link">Already have an account? Log in</string>
+    <string name="job_id_label">Job ID: %s</string>
+    <string name="load_results_error">Failed to load results: %s</string>
+    <string name="loading">Loading…</string>
+    <string name="login_button">Login</string>
+    <string name="login_failed">Login failed: %s</string>
+    <string name="login_subtitle">Log in to process your medical files.</string>
+    <string name="login_welcome">Welcome Back</string>
+    <string name="model_findings_title">Model Findings</string>
+    <string name="nifti_output_preview">Processed NIfTI Output</string>
+    <string name="no_account_link">Don\'t have an account? Create one</string>
+    <string name="no_metadata_available">No additional metadata available.</string>
+    <string name="password_label">Password</string>
+    <string name="preparing_analysis">Preparing for AI analysis…</string>
+    <string name="processing_in_progress">AI Analysis in Progress</string>
+    <string name="project_id" translatable="false">medical-processor-prod</string>
+    <string name="register_button">Register</string>
+    <string name="register_subtitle">Join us to start processing medical files.</string>
+    <string name="register_title">Create Account</string>
+    <string name="registration_failed">Registration failed: %s</string>
+    <string name="result_id_label">Result ID</string>
+    <string name="results_title">Analysis Results</string>
+    <string name="retry_button">Retry</string>
+    <string name="select_file">Select Medical File</string>
+    <string name="selected_file_label">Selected: %s</string>
+    <string name="start_processing_button">Start Processing</string>
+    <string name="status_check_error">Error checking status: %s</string>
+    <string name="status_label">Status: %s</string>
+    <string name="unknown_file">Unknown File</string>
+    <string name="upload_error">Upload failed: %s</string>
+    <string name="upload_screen_subtitle">Select a NIfTI (.nii or .nii.gz) file to begin analysis.</string>
+    <string name="upload_screen_title">Process Medical Scan</string>
+    <string name="uploading_label">Uploading: %s</string>
+    <string name="view_analysis_button">View Analysis</string>
+    <style name="Theme.MedicalFileProcessor" parent="Theme.Material3.DayNight.NoActionBar"/>
+</resources>

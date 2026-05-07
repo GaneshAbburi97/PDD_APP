@@ -1,0 +1,26 @@
+package com.medical.fileprocessor.ui.navigation;
+
+import androidx.compose.runtime.Composable;
+import androidx.compose.ui.Modifier;
+import androidx.navigation.NavType;
+import com.medical.fileprocessor.ui.screens.*;
+import com.medical.fileprocessor.util.Constants;
+import com.medical.fileprocessor.viewmodel.AuthViewModel;
+
+@kotlin.Metadata(mv = {1, 9, 0}, k = 2, xi = 48, d1 = {"\u0000\u000e\n\u0000\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\u001a\u0012\u0010\u0000\u001a\u00020\u00012\b\b\u0002\u0010\u0002\u001a\u00020\u0003H\u0007\u00a8\u0006\u0004"}, d2 = {"NavGraph", "", "authViewModel", "Lcom/medical/fileprocessor/viewmodel/AuthViewModel;", "app_release"})
+public final class NavGraphKt {
+    
+    /**
+     * Main Navigation Graph for the Medical File Processor app.
+     *
+     * Handles routing between:
+     * - Authentication (login/register)
+     * - File upload (main app)
+     * - Processing results
+     * - Session persistence (auto-login)
+     */
+    @androidx.compose.runtime.Composable()
+    public static final void NavGraph(@org.jetbrains.annotations.NotNull()
+    com.medical.fileprocessor.viewmodel.AuthViewModel authViewModel) {
+    }
+}
