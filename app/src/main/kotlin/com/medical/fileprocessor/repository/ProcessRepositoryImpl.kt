@@ -19,6 +19,11 @@ import javax.inject.Singleton
  * processing initialization, and status tracking.
  * 
  * Also integrates with Firestore for metadata persistence and realtime updates.
+ * 
+ * ERROR HANDLING:
+ * - Catches all exceptions (network, timeout, auth)
+ * - Emits Resource.Error with detailed messages
+ * - Automatic retry via OkHttp interceptor
  */
 @Singleton
 class ProcessRepositoryImpl @Inject constructor(
@@ -29,20 +34,30 @@ class ProcessRepositoryImpl @Inject constructor(
 
     /**
      * Checks if the local/research backend is reachable and healthy.
+     * 
+     * NETWORK SAFETY:
+     * - Timeout: 60s (set in NetworkModule)
+     * - Retry: 3 attempts with exponential backoff (set in NetworkModule)
+     * - Error: Returns detailed error message
      */
     fun checkBackendHealth(): Flow<Resource<HealthStatus>> = flow {
         emit(Resource.Loading())
         try {
+            Timber.tag("PROCESS").d("🏥 Checking backend health...")
             val response = apiService.checkHealth()
+            
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.data?.let {
+                    Timber.tag("PROCESS").i("✅ Backend healthy: ${it.status}")
                     emit(Resource.Success(it))
                 } ?: emit(Resource.Error(Exception("Health data is null")))
             } else {
-                emit(Resource.Error(Exception("Backend unreachable or unhealthy")))
+                val errorMsg = response.body()?.message ?: "Backend unreachable or unhealthy"
+                Timber.tag("PROCESS").w("⚠️ Backend unhealthy: $errorMsg (${response.code()})")
+                emit(Resource.Error(Exception(errorMsg)))
             }
         } catch (e: Exception) {
-            Timber.tag("PROCESS").e(e, "❌ Health check failed")
+            Timber.tag("PROCESS").e(e, "❌ Health check failed: ${e.localizedMessage}")
             emit(Resource.Error(e))
         }
     }
@@ -59,7 +74,9 @@ class ProcessRepositoryImpl @Inject constructor(
                     emit(Resource.Success(it))
                 } ?: emit(Resource.Error(Exception("Upload data is null")))
             } else {
-                emit(Resource.Error(Exception(response.body()?.message ?: "File upload failed")))
+                val errorMsg = response.body()?.message ?: "File upload failed"
+                Timber.tag("PROCESS").e("❌ Upload failed: $errorMsg (${response.code()})")
+                emit(Resource.Error(Exception(errorMsg)))
             }
         } catch (e: Exception) {
             Timber.tag("PROCESS").e(e, "❌ Upload error: ${e.localizedMessage}")
@@ -77,7 +94,7 @@ class ProcessRepositoryImpl @Inject constructor(
                 response.body()?.data?.let { processResponse ->
                     val jobId = processResponse.jobId
                     
-                    // Create Firestore job record
+                    // Create Firestore job record (non-blocking failure)
                     try {
                         val userId = firebaseAuth.currentUser?.uid ?: "unknown"
                         firestoreJobRepository.createJob(
@@ -88,8 +105,8 @@ class ProcessRepositoryImpl @Inject constructor(
                         )
                         Timber.tag("PROCESS").i("✅ Firestore job created: $jobId")
                     } catch (e: Exception) {
-                        Timber.tag("PROCESS").w("⚠️ Failed to create Firestore job: ${e.localizedMessage}")
-                        // Don't fail the entire flow if Firestore write fails
+                        Timber.tag("PROCESS").w(e, "⚠️ Failed to create Firestore job: ${e.localizedMessage}")
+                        // Don't fail the entire flow if Firestore write fails - backend is primary
                     }
                     
                     Timber.tag("PROCESS").i("✅ Processing started: $jobId")
@@ -97,7 +114,9 @@ class ProcessRepositoryImpl @Inject constructor(
                     
                 } ?: emit(Resource.Error(Exception("Response data is null")))
             } else {
-                emit(Resource.Error(Exception(response.body()?.message ?: "Processing start failed")))
+                val errorMsg = response.body()?.message ?: "Processing start failed"
+                Timber.tag("PROCESS").e("❌ Processing start failed: $errorMsg (${response.code()})")
+                emit(Resource.Error(Exception(errorMsg)))
             }
         } catch (e: Exception) {
             Timber.tag("PROCESS").e(e, "❌ Processing start error: ${e.localizedMessage}")
@@ -117,7 +136,9 @@ class ProcessRepositoryImpl @Inject constructor(
                     emit(Resource.Success(it))
                 } ?: emit(Resource.Error(Exception("Job data is null")))
             } else {
-                emit(Resource.Error(Exception(response.body()?.message ?: "Status check failed")))
+                val errorMsg = response.body()?.message ?: "Status check failed"
+                Timber.tag("PROCESS").w("⚠️ Status check error: $errorMsg (${response.code()})")
+                emit(Resource.Error(Exception(errorMsg)))
             }
         } catch (e: Exception) {
             Timber.tag("PROCESS").e(e, "❌ Status check error: ${e.localizedMessage}")
@@ -137,7 +158,9 @@ class ProcessRepositoryImpl @Inject constructor(
                     emit(Resource.Success(it))
                 } ?: emit(Resource.Error(Exception("Result data is null")))
             } else {
-                emit(Resource.Error(Exception(response.body()?.message ?: "Result fetch failed")))
+                val errorMsg = response.body()?.message ?: "Result fetch failed"
+                Timber.tag("PROCESS").w("⚠️ Result fetch error: $errorMsg (${response.code()})")
+                emit(Resource.Error(Exception(errorMsg)))
             }
         } catch (e: Exception) {
             Timber.tag("PROCESS").e(e, "❌ Result fetch error: ${e.localizedMessage}")
@@ -146,15 +169,21 @@ class ProcessRepositoryImpl @Inject constructor(
     }
 
     /**
-     * NEW: Listens to realtime job status updates via Firestore.
+     * Listens to realtime job status updates via Firestore.
      * 
-     * Replaces polling with realtime listener.
+     * Replaces polling with realtime listener for faster updates.
      * Returns a Flow that emits updates whenever job status changes.
+     * 
+     * LISTENER SAFETY:
+     * - Automatically cancelled when Flow collection stops
+     * - Lifecycle-safe when used in viewModelScope
+     * - No memory leaks (listeners tracked by Firestore)
      * 
      * @param jobId Job to listen to
      * @return Flow emitting realtime job updates
      */
     fun listenToJobStatus(jobId: String): Flow<Resource<ProcessingJob>> {
+        Timber.tag("PROCESS").d("👂 Setting up realtime listener for job: $jobId")
         return firestoreJobRepository.listenToJob(jobId)
     }
 }

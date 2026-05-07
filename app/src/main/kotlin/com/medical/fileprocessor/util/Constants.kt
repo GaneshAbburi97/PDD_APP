@@ -1,7 +1,13 @@
 package com.medical.fileprocessor.util
 
+import com.medical.fileprocessor.BuildConfig
+
 /**
  * Object containing all app constants.
+ *
+ * Environment selection via BuildConfig.BACKEND_ENV:
+ * - debug -> EMULATOR (http://10.0.2.2:8000)
+ * - release -> PROD (https://us-central1-...)
  */
 object Constants {
 
@@ -38,8 +44,27 @@ object Constants {
         DEVICE
     }
 
-    private val CURRENT_ENVIRONMENT = ApiEnvironment.PROD
+    /**
+     * Determine environment from BuildConfig.BACKEND_ENV
+     *
+     * SAFETY:
+     * - BuildConfig field injected by build system during compilation
+     * - Default to PROD for production builds
+     */
+    private val CURRENT_ENVIRONMENT: ApiEnvironment = try {
+        when (BuildConfig.BACKEND_ENV.lowercase()) {
+            "emulator" -> ApiEnvironment.EMULATOR
+            "device" -> ApiEnvironment.DEVICE
+            else -> ApiEnvironment.PROD
+        }
+    } catch (e: Exception) {
+        // Fallback if BuildConfig not available
+        if (BuildConfig.DEBUG) ApiEnvironment.EMULATOR else ApiEnvironment.PROD
+    }
 
+    /**
+     * Base URL for Retrofit - automatically switches based on build environment
+     */
     val BASE_URL = when (CURRENT_ENVIRONMENT) {
         ApiEnvironment.PROD -> FIREBASE_API_BASE_URL
         ApiEnvironment.EMULATOR -> LOCAL_EMULATOR_API_BASE_URL
@@ -124,7 +149,7 @@ object Constants {
 
     const val ERROR_NO_INTERNET = "No internet connection"
     const val ERROR_INVALID_FILE = "Invalid file format. Please use .nii or .nii.gz"
-    const val ERROR_FILE_TOO_LARGE = "File size exceeds 500 MB limit"
+    const val ERROR_FILE_TOO_LARGE = "File size exceeds 50 MB limit"
     const val ERROR_UPLOAD_FAILED = "File upload failed. Please try again"
     const val ERROR_PROCESSING_FAILED = "Processing failed. Please try again"
     const val ERROR_INVALID_CREDENTIALS = "Invalid email or password"

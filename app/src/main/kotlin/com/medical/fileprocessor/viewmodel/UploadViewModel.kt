@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -91,52 +92,69 @@ class UploadViewModel @Inject constructor(
         val userEmail = authRepository.getCurrentUser()?.email ?: "guest@medical.com"
 
         viewModelScope.launch {
-            // Optional image compression if it's a standard image (not .nii)
-            var uploadUri = uri
-            if (fileName.endsWith(".jpg") || fileName.endsWith(".png")) {
-                imageCompressor.compressImage(uri)?.let { compressedFile ->
-                    uploadUri = Uri.fromFile(compressedFile)
+            try {
+                // Optional image compression if it's a standard image (not .nii)
+                var uploadUri = uri
+                if (fileName.endsWith(".jpg", ignoreCase = true) || fileName.endsWith(".png", ignoreCase = true)) {
+                    imageCompressor.compressImage(uri)?.let { compressedFile ->
+                        uploadUri = Uri.fromFile(compressedFile)
+                        Timber.tag("UPLOAD_VM").d("Image compressed: ${compressedFile.length()} bytes")
+                    }
                 }
-            }
 
-            // 1. Upload to Storage
-            storageRepository.uploadFile(uploadUri, fileName).collect { resource ->
-                when (resource) {
-                    is Resource.Loading -> {
-                        val progress = resource.data?.toIntOrNull() ?: 0
-                        _uiState.value = _uiState.value.copy(
-                            status = Resource.Loading(),
-                            uploadProgress = progress
-                        )
-                    }
-                    is Resource.Success -> {
-                        _uiState.value = _uiState.value.copy(uploadProgress = 100)
-                        // 2. Start Processing on Backend
-                        val fileUrl = resource.data
-                        val request = ProcessRequest(
-                            fileUrl = fileUrl,
-                            fileName = fileName,
-                            fileSize = fileSize,
-                            cloudProvider = Constants.DEFAULT_CLOUD_PROVIDER.name.lowercase(),
-                            userEmail = userEmail
-                        )
-                        startBackendProcessing(request)
-                    }
-                    is Resource.Error -> {
-                        _uiState.value = _uiState.value.copy(status = Resource.Error(resource.exception))
+                // 1. Upload to Storage - collect() ensures single emission per upload
+                storageRepository.uploadFile(uploadUri, fileName).collect { resource ->
+                    when (resource) {
+                        is Resource.Loading -> {
+                            val progress = resource.data?.toIntOrNull() ?: 0
+                            _uiState.value = _uiState.value.copy(
+                                status = Resource.Loading(),
+                                uploadProgress = progress
+                            )
+                        }
+                        is Resource.Success -> {
+                            _uiState.value = _uiState.value.copy(uploadProgress = 100)
+                            // 2. Start Processing on Backend
+                            val fileUrl = resource.data
+                            val request = ProcessRequest(
+                                fileUrl = fileUrl,
+                                fileName = fileName,
+                                fileSize = fileSize,
+                                cloudProvider = Constants.DEFAULT_CLOUD_PROVIDER.name.lowercase(),
+                                userEmail = userEmail
+                            )
+                            startBackendProcessing(request)
+                        }
+                        is Resource.Error -> {
+                            Timber.tag("UPLOAD_VM").e(resource.exception, "Upload failed: ${resource.message}")
+                            _uiState.value = _uiState.value.copy(status = Resource.Error(resource.exception))
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Timber.tag("UPLOAD_VM").e(e, "Upload error: ${e.message}")
+                _uiState.value = _uiState.value.copy(status = Resource.Error(e))
             }
         }
     }
 
     private suspend fun startBackendProcessing(request: ProcessRequest) {
-        processRepository.startProcessing(request).collect { result ->
-            _uiState.value = _uiState.value.copy(status = result)
+        try {
+            processRepository.startProcessing(request).collect { result ->
+                _uiState.value = _uiState.value.copy(status = result)
+            }
+        } catch (e: Exception) {
+            Timber.tag("UPLOAD_VM").e(e, "Backend processing error: ${e.message}")
+            _uiState.value = _uiState.value.copy(status = Resource.Error(e))
         }
     }
 
     fun resetState() {
         _uiState.value = UploadUiState()
+        Timber.tag("UPLOAD_VM").d("State reset")
     }
-}
+
+    override fun onCleared() {
+        super.onCleared()
+        Timber.tag("UPLOAD_VM").d("ViewModel cleared - all upload tasks cancelled")
+    }
