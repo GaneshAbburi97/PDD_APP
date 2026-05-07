@@ -32,7 +32,7 @@ class FirebaseAuthInterceptor @Inject constructor(
             try {
                 // Get cached ID token (synchronous, doesn't block network)
                 // Firebase SDK handles refresh automatically
-                currentUser.getIdToken(forceRefresh = false).addOnSuccessListener { tokenResult ->
+                currentUser.getIdToken(false).addOnSuccessListener { tokenResult ->
                     val token = tokenResult?.token
                     if (!token.isNullOrEmpty()) {
                         Timber.tag("AUTH_INT").d("✅ Added auth token to request")
@@ -42,7 +42,7 @@ class FirebaseAuthInterceptor @Inject constructor(
                 }
 
                 // For synchronous interceptor, we need to use the blocking call
-                val tokenTask = currentUser.getIdToken(forceRefresh = false)
+                val tokenTask = currentUser.getIdToken(false)
                 // This will block briefly but necessary for Interceptor interface
                 val timeoutMs = 5000L // 5 second timeout
                 var attempts = 0

@@ -40,7 +40,7 @@ class ProcessRepositoryImpl @Inject constructor(
      * - Retry: 3 attempts with exponential backoff (set in NetworkModule)
      * - Error: Returns detailed error message
      */
-    fun checkBackendHealth(): Flow<Resource<HealthStatus>> = flow {
+    override fun checkBackendHealth(): Flow<Resource<HealthStatus>> = flow {
         emit(Resource.Loading())
         try {
             Timber.tag("PROCESS").d("🏥 Checking backend health...")

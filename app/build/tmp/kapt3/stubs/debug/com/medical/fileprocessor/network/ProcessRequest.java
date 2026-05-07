@@ -19,38 +19,6 @@ public final class ProcessRequest {
     @org.jetbrains.annotations.NotNull()
     private final java.lang.String userEmail = null;
     
-    public ProcessRequest(@org.jetbrains.annotations.NotNull()
-    java.lang.String fileUrl, @org.jetbrains.annotations.NotNull()
-    java.lang.String fileName, long fileSize, @org.jetbrains.annotations.NotNull()
-    java.lang.String cloudProvider, @org.jetbrains.annotations.NotNull()
-    java.lang.String userEmail) {
-        super();
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getFileUrl() {
-        return null;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getFileName() {
-        return null;
-    }
-    
-    public final long getFileSize() {
-        return 0L;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getCloudProvider() {
-        return null;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getUserEmail() {
-        return null;
-    }
-    
     @org.jetbrains.annotations.NotNull()
     public final java.lang.String component1() {
         return null;
@@ -98,6 +66,38 @@ public final class ProcessRequest {
     @java.lang.Override()
     @org.jetbrains.annotations.NotNull()
     public java.lang.String toString() {
+        return null;
+    }
+    
+    public ProcessRequest(@org.jetbrains.annotations.NotNull()
+    java.lang.String fileUrl, @org.jetbrains.annotations.NotNull()
+    java.lang.String fileName, long fileSize, @org.jetbrains.annotations.NotNull()
+    java.lang.String cloudProvider, @org.jetbrains.annotations.NotNull()
+    java.lang.String userEmail) {
+        super();
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getFileUrl() {
+        return null;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getFileName() {
+        return null;
+    }
+    
+    public final long getFileSize() {
+        return 0L;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getCloudProvider() {
+        return null;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getUserEmail() {
         return null;
     }
 }

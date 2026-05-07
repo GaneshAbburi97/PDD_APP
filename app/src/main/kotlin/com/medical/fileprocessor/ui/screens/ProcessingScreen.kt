@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.medical.fileprocessor.model.ProcessingStatus
 import com.medical.fileprocessor.ui.components.StatusCard
 import com.medical.fileprocessor.util.Resource
+import com.medical.fileprocessor.util.dataOrNull
 import com.medical.fileprocessor.viewmodel.ResultViewModel
 import kotlinx.coroutines.delay
 
@@ -99,7 +100,7 @@ fun ProcessingScreen(
                 }
                 is Resource.Error -> {
                     Text(
-                        text = stringResource(com.medical.fileprocessor.R.string.status_check_error, resource.message),
+                        text = stringResource(com.medical.fileprocessor.R.string.status_check_error, resource.message ?: "Unknown error"),
                         color = MaterialTheme.colorScheme.error,
                     )
                     Button(

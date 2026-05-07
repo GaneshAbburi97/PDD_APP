@@ -158,3 +158,4 @@ class UploadViewModel @Inject constructor(
         super.onCleared()
         Timber.tag("UPLOAD_VM").d("ViewModel cleared - all upload tasks cancelled")
     }
+}

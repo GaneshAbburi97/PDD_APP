@@ -16,28 +16,6 @@ public final class RegisterRequest {
     @org.jetbrains.annotations.NotNull()
     private final java.lang.String displayName = null;
     
-    public RegisterRequest(@org.jetbrains.annotations.NotNull()
-    java.lang.String email, @org.jetbrains.annotations.NotNull()
-    java.lang.String password, @org.jetbrains.annotations.NotNull()
-    java.lang.String displayName) {
-        super();
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getEmail() {
-        return null;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getPassword() {
-        return null;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getDisplayName() {
-        return null;
-    }
-    
     @org.jetbrains.annotations.NotNull()
     public final java.lang.String component1() {
         return null;
@@ -75,6 +53,28 @@ public final class RegisterRequest {
     @java.lang.Override()
     @org.jetbrains.annotations.NotNull()
     public java.lang.String toString() {
+        return null;
+    }
+    
+    public RegisterRequest(@org.jetbrains.annotations.NotNull()
+    java.lang.String email, @org.jetbrains.annotations.NotNull()
+    java.lang.String password, @org.jetbrains.annotations.NotNull()
+    java.lang.String displayName) {
+        super();
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getEmail() {
+        return null;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getPassword() {
+        return null;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getDisplayName() {
         return null;
     }
 }

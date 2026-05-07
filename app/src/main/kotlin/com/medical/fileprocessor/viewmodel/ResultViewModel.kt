@@ -8,6 +8,7 @@ import com.medical.fileprocessor.network.NetworkManager
 import com.medical.fileprocessor.repository.ProcessRepository
 import com.medical.fileprocessor.repository.ProcessRepositoryImpl
 import com.medical.fileprocessor.util.Resource
+import com.medical.fileprocessor.util.dataOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

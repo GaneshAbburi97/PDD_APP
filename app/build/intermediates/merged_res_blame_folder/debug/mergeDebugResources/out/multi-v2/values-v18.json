@@ -1,25 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\prasa\\.gradle\\daemon\\8.13\\com.medical.fileprocessor.app-mergeDebugResources-91:\\values-v18\\values-v18.xml",
+            "outputFile": "com.medical.fileprocessor.app-mergeDebugResources-94:/values-v18/values-v18.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\prasa\\.gradle\\caches\\8.13\\transforms\\36c1804d639e24bb25b28121aa613eda\\transformed\\appcompat-1.7.0\\res\\values-v18\\values-v18.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "48",
-                        "endOffsets": "99"
-                    }
-                }
-            ]
-        },
-        {
-            "outputFile": "com.medical.fileprocessor.app-mergeDebugResources-91:/values-v18/values-v18.xml",
-            "map": [
-                {
-                    "source": "C:\\Users\\prasa\\.gradle\\caches\\8.13\\transforms\\36c1804d639e24bb25b28121aa613eda\\transformed\\appcompat-1.7.0\\res\\values-v18\\values-v18.xml",
+                    "source": "C:\\Users\\prasa\\.gradle\\caches\\9.0.0\\transforms\\64041615752c26757d45560975bdef23\\transformed\\appcompat-1.7.0\\res\\values-v18\\values-v18.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

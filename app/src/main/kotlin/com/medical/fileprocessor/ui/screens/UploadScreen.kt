@@ -18,6 +18,7 @@ import com.medical.fileprocessor.ui.components.FilePickerButton
 import com.medical.fileprocessor.ui.components.UploadProgressBar
 import com.medical.fileprocessor.util.Resource
 import com.medical.fileprocessor.util.getFileName
+import com.medical.fileprocessor.util.isLoading
 import com.medical.fileprocessor.viewmodel.UploadViewModel
 
 @Composable
@@ -165,7 +166,7 @@ fun UploadScreen(
                 }
                 is Resource.Error -> {
                     Text(
-                        text = stringResource(com.medical.fileprocessor.R.string.upload_error, status.message),
+                        text = stringResource(com.medical.fileprocessor.R.string.upload_error, status.message ?: "Unknown error"),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )

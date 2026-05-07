@@ -1,5 +1,6 @@
 package com.medical.fileprocessor.viewmodel;
 
+import com.medical.fileprocessor.network.NetworkManager;
 import com.medical.fileprocessor.repository.ProcessRepository;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -25,20 +26,26 @@ import javax.inject.Provider;
 public final class ResultViewModel_Factory implements Factory<ResultViewModel> {
   private final Provider<ProcessRepository> repositoryProvider;
 
-  public ResultViewModel_Factory(Provider<ProcessRepository> repositoryProvider) {
+  private final Provider<NetworkManager> networkManagerProvider;
+
+  public ResultViewModel_Factory(Provider<ProcessRepository> repositoryProvider,
+      Provider<NetworkManager> networkManagerProvider) {
     this.repositoryProvider = repositoryProvider;
+    this.networkManagerProvider = networkManagerProvider;
   }
 
   @Override
   public ResultViewModel get() {
-    return newInstance(repositoryProvider.get());
+    return newInstance(repositoryProvider.get(), networkManagerProvider.get());
   }
 
-  public static ResultViewModel_Factory create(Provider<ProcessRepository> repositoryProvider) {
-    return new ResultViewModel_Factory(repositoryProvider);
+  public static ResultViewModel_Factory create(Provider<ProcessRepository> repositoryProvider,
+      Provider<NetworkManager> networkManagerProvider) {
+    return new ResultViewModel_Factory(repositoryProvider, networkManagerProvider);
   }
 
-  public static ResultViewModel newInstance(ProcessRepository repository) {
-    return new ResultViewModel(repository);
+  public static ResultViewModel newInstance(ProcessRepository repository,
+      NetworkManager networkManager) {
+    return new ResultViewModel(repository, networkManager);
   }
 }

@@ -1,9 +1,15 @@
 package com.medical.fileprocessor.util;
 
+import com.medical.fileprocessor.BuildConfig;
+
 /**
  * Object containing all app constants.
+ *
+ * Environment selection via BuildConfig.BACKEND_ENV:
+ * - debug -> EMULATOR (http://10.0.2.2:8000)
+ * - release -> PROD (https://us-central1-...)
  */
-@kotlin.Metadata(mv = {1, 9, 0}, k = 1, xi = 48, d1 = {"\u00004\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0010\u000e\n\u0002\b\b\n\u0002\u0010\b\n\u0002\b\u0006\n\u0002\u0010\t\n\u0002\b\u001c\n\u0002\u0010 \n\u0002\b\u000f\b\u00c7\u0002\u0018\u00002\u00020\u0001:\u0001CB\u0007\b\u0002\u00a2\u0006\u0002\u0010\u0002R\u0011\u0010\u0003\u001a\u00020\u0004\u00a2\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0006R\u000e\u0010\u0007\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\t\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\n\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u000b\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\f\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\r\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u000e\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u000f\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0010\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0012\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0013\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0014\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0015\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0016\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0017\u001a\u00020\u0018X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0019\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001a\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001b\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001c\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001d\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001e\u001a\u00020\u0018X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001f\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010 \u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010!\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\"\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010#\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010$\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010%\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010&\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\'\u001a\u00020\u0018X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010(\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010)\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010*\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010+\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010,\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010-\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010.\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010/\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00100\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00101\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00102\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00103\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u0017\u00104\u001a\b\u0012\u0004\u0012\u00020\b05\u00a2\u0006\b\n\u0000\u001a\u0004\b6\u00107R\u0017\u00108\u001a\b\u0012\u0004\u0012\u00020\b05\u00a2\u0006\b\n\u0000\u001a\u0004\b9\u00107R\u000e\u0010:\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010;\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010<\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010=\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010>\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010?\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010@\u001a\u00020\bX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010A\u001a\u00020\u0018X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010B\u001a\u00020\u0011X\u0086T\u00a2\u0006\u0002\n\u0000\u00a8\u0006D"}, d2 = {"Lcom/medical/fileprocessor/util/Constants;", "", "()V", "DEFAULT_CLOUD_PROVIDER", "Lcom/medical/fileprocessor/util/Constants$CloudProvider;", "getDEFAULT_CLOUD_PROVIDER", "()Lcom/medical/fileprocessor/util/Constants$CloudProvider;", "ERROR_EMAIL_ALREADY_EXISTS", "", "ERROR_FILE_TOO_LARGE", "ERROR_INVALID_CREDENTIALS", "ERROR_INVALID_FILE", "ERROR_NO_INTERNET", "ERROR_PROCESSING_FAILED", "ERROR_UPLOAD_FAILED", "ERROR_WEAK_PASSWORD", "ESTIMATED_PROCESSING_TIME_SECONDS", "", "FIREBASE_API_BASE_URL", "FIREBASE_PROJECT_ID", "FIREBASE_STORAGE_BUCKET", "FIRESTORE_DATABASE_ID", "LOCAL_API_BASE_URL", "MAX_FILE_SIZE_MB", "", "MAX_POLLING_ATTEMPTS", "MIN_PASSWORD_DIGITS", "MIN_PASSWORD_LENGTH", "MIN_PASSWORD_LOWERCASE", "MIN_PASSWORD_UPPERCASE", "POLLING_INTERVAL_MS", "PREF_AUTH_TOKEN", "PREF_CLOUD_PROVIDER", "PREF_DARK_MODE", "PREF_LAST_FILE_PATH", "PREF_NAME", "PREF_USER_DISPLAY_NAME", "PREF_USER_EMAIL", "PREF_USER_ID", "PROCESSING_TIMEOUT_MS", "ROUTE_HISTORY", "ROUTE_LOGIN", "ROUTE_PROCESSING", "ROUTE_REGISTER", "ROUTE_RESULT", "ROUTE_SETTINGS", "ROUTE_UPLOAD", "SUCCESS_LOGIN", "SUCCESS_PROCESSING", "SUCCESS_PROCESSING_COMPLETE", "SUCCESS_REGISTER", "SUCCESS_UPLOAD", "SUPPORTED_FILE_EXTENSIONS", "", "getSUPPORTED_FILE_EXTENSIONS", "()Ljava/util/List;", "SUPPORTED_MIME_TYPES", "getSUPPORTED_MIME_TYPES", "TAG_AUTH", "TAG_DATABASE", "TAG_NETWORK", "TAG_PROCESSING", "TAG_STORAGE", "TAG_UI", "TAG_UPLOAD", "TOKEN_REFRESH_INTERVAL_MS", "UPLOAD_CHUNK_SIZE", "CloudProvider", "app_debug"})
+@kotlin.Metadata(mv = {1, 9, 0}, k = 1, xi = 48, d1 = {"\u0000:\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\n\u0002\u0010\u000e\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u000b\n\u0002\u0010\b\n\u0002\b\u0007\n\u0002\u0010\t\n\u0002\b\u001c\n\u0002\u0010 \n\u0002\b\u0010\b\u00c7\u0002\u0018\u00002\u00020\u0001:\u0002IJB\u0007\b\u0002\u00a2\u0006\u0002\u0010\u0002R\u0011\u0010\u0003\u001a\u00020\u0004\u00a2\u0006\b\n\u0000\u001a\u0004\b\u0005\u0010\u0006R\u000e\u0010\u0007\u001a\u00020\bX\u0082\u0004\u00a2\u0006\u0002\n\u0000R\u0011\u0010\t\u001a\u00020\n\u00a2\u0006\b\n\u0000\u001a\u0004\b\u000b\u0010\fR\u000e\u0010\r\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u000e\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u000f\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0010\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0011\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0012\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0013\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0014\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0015\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0017\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0018\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u0019\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001a\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001b\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001c\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001d\u001a\u00020\u001eX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\u001f\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010 \u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010!\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\"\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010#\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010$\u001a\u00020\u001eX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010%\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010&\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010\'\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010(\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010)\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010*\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010+\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010,\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010-\u001a\u00020\u001eX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010.\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010/\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00100\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00101\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00102\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00103\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00104\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00105\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00106\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00107\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00108\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u00109\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u0017\u0010:\u001a\b\u0012\u0004\u0012\u00020\u00040;\u00a2\u0006\b\n\u0000\u001a\u0004\b<\u0010=R\u0017\u0010>\u001a\b\u0012\u0004\u0012\u00020\u00040;\u00a2\u0006\b\n\u0000\u001a\u0004\b?\u0010=R\u000e\u0010@\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010A\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010B\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010C\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010D\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010E\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010F\u001a\u00020\u0004X\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010G\u001a\u00020\u001eX\u0086T\u00a2\u0006\u0002\n\u0000R\u000e\u0010H\u001a\u00020\u0016X\u0086T\u00a2\u0006\u0002\n\u0000\u00a8\u0006K"}, d2 = {"Lcom/medical/fileprocessor/util/Constants;", "", "()V", "BASE_URL", "", "getBASE_URL", "()Ljava/lang/String;", "CURRENT_ENVIRONMENT", "Lcom/medical/fileprocessor/util/Constants$ApiEnvironment;", "DEFAULT_CLOUD_PROVIDER", "Lcom/medical/fileprocessor/util/Constants$CloudProvider;", "getDEFAULT_CLOUD_PROVIDER", "()Lcom/medical/fileprocessor/util/Constants$CloudProvider;", "ERROR_EMAIL_ALREADY_EXISTS", "ERROR_FILE_TOO_LARGE", "ERROR_INVALID_CREDENTIALS", "ERROR_INVALID_FILE", "ERROR_NO_INTERNET", "ERROR_PROCESSING_FAILED", "ERROR_UPLOAD_FAILED", "ERROR_WEAK_PASSWORD", "ESTIMATED_PROCESSING_TIME_SECONDS", "", "FIREBASE_API_BASE_URL", "FIREBASE_PROJECT_ID", "FIREBASE_STORAGE_BUCKET", "FIRESTORE_DATABASE_ID", "LOCAL_DEVICE_API_BASE_URL", "LOCAL_EMULATOR_API_BASE_URL", "MAX_FILE_SIZE_MB", "", "MAX_POLLING_ATTEMPTS", "MIN_PASSWORD_DIGITS", "MIN_PASSWORD_LENGTH", "MIN_PASSWORD_LOWERCASE", "MIN_PASSWORD_UPPERCASE", "POLLING_INTERVAL_MS", "PREF_AUTH_TOKEN", "PREF_CLOUD_PROVIDER", "PREF_DARK_MODE", "PREF_LAST_FILE_PATH", "PREF_NAME", "PREF_USER_DISPLAY_NAME", "PREF_USER_EMAIL", "PREF_USER_ID", "PROCESSING_TIMEOUT_MS", "ROUTE_HISTORY", "ROUTE_LOGIN", "ROUTE_PROCESSING", "ROUTE_REGISTER", "ROUTE_RESULT", "ROUTE_SETTINGS", "ROUTE_UPLOAD", "SUCCESS_LOGIN", "SUCCESS_PROCESSING", "SUCCESS_PROCESSING_COMPLETE", "SUCCESS_REGISTER", "SUCCESS_UPLOAD", "SUPPORTED_FILE_EXTENSIONS", "", "getSUPPORTED_FILE_EXTENSIONS", "()Ljava/util/List;", "SUPPORTED_MIME_TYPES", "getSUPPORTED_MIME_TYPES", "TAG_AUTH", "TAG_DATABASE", "TAG_NETWORK", "TAG_PROCESSING", "TAG_STORAGE", "TAG_UI", "TAG_UPLOAD", "TOKEN_REFRESH_INTERVAL_MS", "UPLOAD_CHUNK_SIZE", "ApiEnvironment", "CloudProvider", "app_debug"})
 public final class Constants {
     
     /**
@@ -14,7 +20,25 @@ public final class Constants {
     @org.jetbrains.annotations.NotNull()
     public static final java.lang.String FIREBASE_API_BASE_URL = "https://us-central1-medical-processor.cloudfunctions.net";
     @org.jetbrains.annotations.NotNull()
-    public static final java.lang.String LOCAL_API_BASE_URL = "http://10.0.2.2:8000";
+    public static final java.lang.String LOCAL_EMULATOR_API_BASE_URL = "http://10.0.2.2:8000";
+    @org.jetbrains.annotations.NotNull()
+    public static final java.lang.String LOCAL_DEVICE_API_BASE_URL = "http://192.168.1.100:8000";
+    
+    /**
+     * Determine environment from BuildConfig.BACKEND_ENV
+     *
+     * SAFETY:
+     * - BuildConfig field injected by build system during compilation
+     * - Default to PROD for production builds
+     */
+    @org.jetbrains.annotations.NotNull()
+    private static final com.medical.fileprocessor.util.Constants.ApiEnvironment CURRENT_ENVIRONMENT = null;
+    
+    /**
+     * Base URL for Retrofit - automatically switches based on build environment
+     */
+    @org.jetbrains.annotations.NotNull()
+    private static final java.lang.String BASE_URL = null;
     @org.jetbrains.annotations.NotNull()
     public static final java.lang.String FIREBASE_PROJECT_ID = "medical-processor-prod";
     @org.jetbrains.annotations.NotNull()
@@ -71,7 +95,7 @@ public final class Constants {
     @org.jetbrains.annotations.NotNull()
     public static final java.lang.String ERROR_INVALID_FILE = "Invalid file format. Please use .nii or .nii.gz";
     @org.jetbrains.annotations.NotNull()
-    public static final java.lang.String ERROR_FILE_TOO_LARGE = "File size exceeds 500 MB limit";
+    public static final java.lang.String ERROR_FILE_TOO_LARGE = "File size exceeds 50 MB limit";
     @org.jetbrains.annotations.NotNull()
     public static final java.lang.String ERROR_UPLOAD_FAILED = "File upload failed. Please try again";
     @org.jetbrains.annotations.NotNull()
@@ -121,6 +145,14 @@ public final class Constants {
         return null;
     }
     
+    /**
+     * Base URL for Retrofit - automatically switches based on build environment
+     */
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getBASE_URL() {
+        return null;
+    }
+    
     @org.jetbrains.annotations.NotNull()
     public final java.util.List<java.lang.String> getSUPPORTED_FILE_EXTENSIONS() {
         return null;
@@ -129,6 +161,24 @@ public final class Constants {
     @org.jetbrains.annotations.NotNull()
     public final java.util.List<java.lang.String> getSUPPORTED_MIME_TYPES() {
         return null;
+    }
+    
+    /**
+     * Environment selection for API.
+     */
+    @kotlin.Metadata(mv = {1, 9, 0}, k = 1, xi = 48, d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0010\n\u0002\b\u0005\b\u0086\u0081\u0002\u0018\u00002\b\u0012\u0004\u0012\u00020\u00000\u0001B\u0007\b\u0002\u00a2\u0006\u0002\u0010\u0002j\u0002\b\u0003j\u0002\b\u0004j\u0002\b\u0005\u00a8\u0006\u0006"}, d2 = {"Lcom/medical/fileprocessor/util/Constants$ApiEnvironment;", "", "(Ljava/lang/String;I)V", "PROD", "EMULATOR", "DEVICE", "app_debug"})
+    public static enum ApiEnvironment {
+        /*public static final*/ PROD /* = new PROD() */,
+        /*public static final*/ EMULATOR /* = new EMULATOR() */,
+        /*public static final*/ DEVICE /* = new DEVICE() */;
+        
+        ApiEnvironment() {
+        }
+        
+        @org.jetbrains.annotations.NotNull()
+        public static kotlin.enums.EnumEntries<com.medical.fileprocessor.util.Constants.ApiEnvironment> getEntries() {
+            return null;
+        }
     }
     
     /**

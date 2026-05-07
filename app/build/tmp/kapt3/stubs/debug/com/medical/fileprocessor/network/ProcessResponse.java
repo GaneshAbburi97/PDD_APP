@@ -15,26 +15,6 @@ public final class ProcessResponse {
     @org.jetbrains.annotations.NotNull()
     private final java.lang.String status = null;
     
-    public ProcessResponse(@org.jetbrains.annotations.NotNull()
-    java.lang.String jobId, int estimatedTimeSeconds, @org.jetbrains.annotations.NotNull()
-    java.lang.String status) {
-        super();
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getJobId() {
-        return null;
-    }
-    
-    public final int getEstimatedTimeSeconds() {
-        return 0;
-    }
-    
-    @org.jetbrains.annotations.NotNull()
-    public final java.lang.String getStatus() {
-        return null;
-    }
-    
     @org.jetbrains.annotations.NotNull()
     public final java.lang.String component1() {
         return null;
@@ -70,6 +50,26 @@ public final class ProcessResponse {
     @java.lang.Override()
     @org.jetbrains.annotations.NotNull()
     public java.lang.String toString() {
+        return null;
+    }
+    
+    public ProcessResponse(@org.jetbrains.annotations.NotNull()
+    java.lang.String jobId, int estimatedTimeSeconds, @org.jetbrains.annotations.NotNull()
+    java.lang.String status) {
+        super();
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getJobId() {
+        return null;
+    }
+    
+    public final int getEstimatedTimeSeconds() {
+        return 0;
+    }
+    
+    @org.jetbrains.annotations.NotNull()
+    public final java.lang.String getStatus() {
         return null;
     }
 }

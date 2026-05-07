@@ -1,25 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\prasa\\.gradle\\daemon\\8.13\\com.medical.fileprocessor.app-mergeDebugResources-91:\\values-small-v4\\values-small-v4.xml",
+            "outputFile": "com.medical.fileprocessor.app-mergeDebugResources-94:/values-small-v4/values-small-v4.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\prasa\\.gradle\\caches\\8.13\\transforms\\e1fe5325c44cd75842eeb09816807138\\transformed\\material-1.12.0\\res\\values-small-v4\\values-small-v4.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,128,198,270",
-                        "endColumns": "72,69,71,69",
-                        "endOffsets": "123,193,265,335"
-                    }
-                }
-            ]
-        },
-        {
-            "outputFile": "com.medical.fileprocessor.app-mergeDebugResources-91:/values-small-v4/values-small-v4.xml",
-            "map": [
-                {
-                    "source": "C:\\Users\\prasa\\.gradle\\caches\\8.13\\transforms\\e1fe5325c44cd75842eeb09816807138\\transformed\\material-1.12.0\\res\\values-small-v4\\values-small-v4.xml",
+                    "source": "C:\\Users\\prasa\\.gradle\\caches\\9.0.0\\transforms\\e94c7953a0cc6741ee58e6b50484d222\\transformed\\material-1.12.0\\res\\values-small-v4\\values-small-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",
