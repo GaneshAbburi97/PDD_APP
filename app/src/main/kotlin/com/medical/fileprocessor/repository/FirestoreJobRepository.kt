@@ -256,7 +256,9 @@ class FirestoreJobRepository @Inject constructor(
                 createdAt = (data["createdAt"] as? Number)?.toLong() ?: 0L,
                 updatedAt = (data["updatedAt"] as? Number)?.toLong() ?: 0L,
                 resultUrl = data["outputFileUrl"] as? String,
-                metadata = (data["metadata"] as? Map<String, Any>)?.mapValues { it.value.toString() }
+                metadata = (data["metadata"] as? Map<*, *>)?.entries?.associate { 
+                    it.key.toString() to it.value.toString() 
+                }
             )
         } catch (e: Exception) {
             Timber.tag("FIRESTORE").w(e, "⚠️ Failed to map job document: ${e.message}")

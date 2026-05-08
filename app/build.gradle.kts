@@ -147,5 +147,9 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+    arguments {
+        arg("dagger.fastInit", "enabled")
+        arg("kapt.kotlin.generated", "true")
+    }
 }
 

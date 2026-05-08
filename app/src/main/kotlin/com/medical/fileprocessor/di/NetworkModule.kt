@@ -8,7 +8,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.delay
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -64,7 +63,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideFirebaseAuthInterceptor(
-        firebaseAuth: FirebaseAuth
+        firebaseAuth: FirebaseAuth,
     ): FirebaseAuthInterceptor {
         return FirebaseAuthInterceptor(firebaseAuth)
     }
@@ -104,7 +103,7 @@ object NetworkModule {
                 }
 
                 var attempt = 0
-                while (response == null || (!response.isSuccessful && attempt < 3)) {
+                while ((response == null || !response.isSuccessful) && attempt < 3) {
                     if (response != null) {
                         response.close()
                     }
@@ -125,11 +124,7 @@ object NetworkModule {
                     }
                 }
 
-                if (response != null) {
-                    response
-                } else {
-                    throw lastException ?: Exception("Unknown network error")
-                }
+                response ?: throw (lastException ?: Exception("Unknown network error"))
             }
             // Add logging last (to see final request with auth)
             .addInterceptor(loggingInterceptor)
