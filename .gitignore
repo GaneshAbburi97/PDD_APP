@@ -1,0 +1,23 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Backend temp
+backend/temp/
+backend/outputs/
+
+# Firebase secrets
+firebase-adminsdk.json
+*.json
+
+# Android
+.gradle/
+local.properties
+.idea/
+build/
+app/build/
+
+# OS
+.DS_Store
+Thumbs.db
