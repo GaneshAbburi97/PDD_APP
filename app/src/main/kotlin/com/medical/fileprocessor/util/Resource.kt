@@ -6,7 +6,7 @@ sealed class Resource<T>(
     open val exception: Throwable? = null
 ) {
     class Success<T>(override val data: T) : Resource<T>(data)
-    class Error<T>(override val exception: Throwable? = null, override val message: String? = null, override val data: T? = null) : Resource<T>(data, message, exception)
+    class Error<T>(override val exception: Throwable? = null, override val message: String? = exception?.message, override val data: T? = null) : Resource<T>(data, message, exception)
     class Loading<T>(override val data: T? = null) : Resource<T>(data)
 }
 

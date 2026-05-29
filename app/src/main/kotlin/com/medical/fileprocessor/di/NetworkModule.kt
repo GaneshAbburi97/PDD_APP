@@ -51,6 +51,7 @@ object NetworkModule {
             } else {
                 HttpLoggingInterceptor.Level.NONE
             }
+            redactHeader("Authorization")
         }
     }
 

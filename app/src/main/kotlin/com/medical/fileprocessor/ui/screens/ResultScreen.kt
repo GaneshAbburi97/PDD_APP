@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,7 +50,7 @@ fun ResultScreen(
                 title = { Text("AI Analysis Result", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -82,14 +83,10 @@ fun ResultScreen(
                 }
                 is Resource.Success -> {
                     val result = resource.data
-                    if (result != null) {
-                        ResultDetailView(result = result, onDownloadClick = {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.resultUrl))
-                            context.startActivity(intent)
-                        })
-                    } else {
-                        EmptyStateView(onRetry = { viewModel.fetchResult(jobId) })
-                    }
+                    ResultDetailView(result = result, onDownloadClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.resultUrl))
+                        context.startActivity(intent)
+                    })
                 }
                 is Resource.Error -> {
                     ErrorStateView(
@@ -211,11 +208,11 @@ fun ResultDetailView(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 MetricRow(label = "Target Volume (ml)", value = "$volumeMl ml", icon = Icons.Default.Timeline)
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 MetricRow(label = "Confidence Dice Score", value = diceScore, icon = Icons.Default.Grade)
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 MetricRow(label = "AI Hardware Accel", value = procUnit, icon = Icons.Default.Memory)
-                Divider(modifier = Modifier.padding(vertical = 12.dp))
+                HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                 MetricRow(
                     label = "Processing Duration", 
                     value = "${result.processingTimeSeconds ?: 120} seconds", 
