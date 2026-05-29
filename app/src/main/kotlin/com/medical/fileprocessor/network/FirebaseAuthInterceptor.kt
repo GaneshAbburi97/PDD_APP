@@ -1,9 +1,11 @@
 package com.medical.fileprocessor.network
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.tasks.Tasks
 import okhttp3.Interceptor
 import okhttp3.Response
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -30,28 +32,11 @@ class FirebaseAuthInterceptor @Inject constructor(
 
         if (currentUser != null) {
             try {
-                // Get cached ID token (synchronous, doesn't block network)
-                // Firebase SDK handles refresh automatically
-                currentUser.getIdToken(false).addOnSuccessListener { tokenResult ->
-                    val token = tokenResult?.token
-                    if (!token.isNullOrEmpty()) {
-                        Timber.tag("AUTH_INT").d("✅ Added auth token to request")
-                    }
-                }.addOnFailureListener { e ->
-                    Timber.tag("AUTH_INT").w("⚠️ Failed to get auth token: ${e.message}")
-                }
-
-                // For synchronous interceptor, we need to use the blocking call
+                // Synchronously block background OkHttp thread to retrieve token
                 val tokenTask = currentUser.getIdToken(false)
-                // This will block briefly but necessary for Interceptor interface
-                val timeoutMs = 5000L // 5 second timeout
-                var attempts = 0
-                while (!tokenTask.isComplete && attempts < timeoutMs / 100) {
-                    Thread.sleep(100)
-                    attempts++
-                }
+                val tokenResult = Tasks.await(tokenTask, 5, TimeUnit.SECONDS)
+                val token = tokenResult?.token
 
-                val token = tokenTask.result?.token
                 if (!token.isNullOrEmpty()) {
                     request = request.newBuilder()
                         .addHeader("Authorization", "Bearer $token")
@@ -69,4 +54,5 @@ class FirebaseAuthInterceptor @Inject constructor(
         return chain.proceed(request)
     }
 }
+
 

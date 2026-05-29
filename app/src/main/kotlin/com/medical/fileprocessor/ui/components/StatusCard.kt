@@ -1,6 +1,7 @@
 package com.medical.fileprocessor.ui.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -72,6 +73,21 @@ fun StatusCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
+            }
+
+            job.resultUrl?.let { url ->
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Result URL:",
+                    style = MaterialTheme.typography.titleSmall
+                )
+                SelectionContainer {
+                    Text(
+                        text = url,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }

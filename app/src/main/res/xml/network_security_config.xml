@@ -8,16 +8,17 @@
         <domain includeSubdomains="true">10.0.3.2</domain>
     </domain-config>
 
-    <!-- Allow cleartext for common local IPs -->
+    <!-- Allow cleartext for common local IPs and specific device network IP -->
     <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">192.168.1.100</domain>
         <domain includeSubdomains="true">192.168.1.1</domain>
         <domain includeSubdomains="true">192.168.0.1</domain>
         <domain includeSubdomains="true">172.16.0.1</domain>
         <domain includeSubdomains="true">10.0.0.1</domain>
     </domain-config>
 
-    <!-- Base config for production should stay secure -->
-    <base-config cleartextTrafficPermitted="false">
+    <!-- Allow cleartext for local development safety -->
+    <base-config cleartextTrafficPermitted="true">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

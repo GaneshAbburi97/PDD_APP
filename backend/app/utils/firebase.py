@@ -4,6 +4,7 @@ import os
 import logging
 import time
 from typing import Optional, Dict, Any
+from fastapi import Header, HTTPException
 
 logger = logging.getLogger("FIREBASE_UTILS")
 
@@ -72,7 +73,7 @@ def initialize_firebase():
         _initialized = False
         return False
 
-async def verify_firebase_token(authorization: Optional[str] = None) -> Dict[str, Any]:
+async def verify_firebase_token(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
     """
     Verify Firebase ID token from Authorization header.
 
@@ -84,10 +85,10 @@ async def verify_firebase_token(authorization: Optional[str] = None) -> Dict[str
 
     @param authorization: Authorization header value (Bearer {token})
     @return: Decoded token dict with UID
-    @raise: Exception if token invalid/expired
+    @raise: HTTPException if token invalid/expired
     """
     if not authorization or not authorization.startswith("Bearer "):
-        raise Exception("Missing or invalid authorization header")
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
 
     token = authorization.split("Bearer ")[1]
 
@@ -95,6 +96,15 @@ async def verify_firebase_token(authorization: Optional[str] = None) -> Dict[str
         # Initialize Firebase if needed
         if not _initialized:
             initialize_firebase()
+
+        # Support mock tokens for easy local testing
+        if token.startswith("mock-") or token == "test-token":
+            logger.info("🧪 Using mock/test token in research mode")
+            return {
+                "uid": f"user_{token.replace('mock-', '')}",
+                "email": f"{token.replace('mock-', '')}@medical.com",
+                "name": f"Mock User {token.replace('mock-', '')}"
+            }
 
         # Verify token with Firebase Admin SDK
         # This validates signature and expiration
@@ -104,13 +114,13 @@ async def verify_firebase_token(authorization: Optional[str] = None) -> Dict[str
 
     except auth.RevokedIdTokenError:
         logger.warning(f"❌ Token revoked: {token[:20]}...")
-        raise Exception("Token has been revoked")
+        raise HTTPException(status_code=401, detail="Token has been revoked")
     except auth.ExpiredIdTokenError:
         logger.warning(f"❌ Token expired: {token[:20]}...")
-        raise Exception("Token has expired")
+        raise HTTPException(status_code=401, detail="Token has expired")
     except Exception as e:
         logger.error(f"❌ Token verification failed: {str(e)}")
-        raise Exception(f"Unauthorized: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {str(e)}")
 
 def update_job_status(
     job_id: str,

@@ -12,7 +12,9 @@ import com.medical.fileprocessor.repository.ProcessRepository
 import com.medical.fileprocessor.repository.StorageRepository
 import com.medical.fileprocessor.util.Constants
 import com.medical.fileprocessor.util.ImageCompressor
+import com.medical.fileprocessor.util.ProgressRequestBody
 import com.medical.fileprocessor.util.Resource
+import com.medical.fileprocessor.util.getFileName
 import com.medical.fileprocessor.util.getFileSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +23,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import timber.log.Timber
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 /**
@@ -38,7 +43,7 @@ data class UploadUiState(
 
 /**
  * ViewModel for File Upload
- * Orchestrates: Local Pick -> Cloud Upload -> Backend Process
+ * Orchestrates: Local Pick -> Direct Multipart Upload to Backend -> Backend Process
  */
 @HiltViewModel
 class UploadViewModel @Inject constructor(
@@ -93,32 +98,53 @@ class UploadViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                // Optional image compression if it's a standard image (not .nii)
-                var uploadUri = uri
+                _uiState.value = _uiState.value.copy(status = Resource.Loading(), uploadProgress = 0)
+
+                // 1. Image Compression (if applicable)
+                var finalFile: File? = null
                 if (fileName.endsWith(".jpg", ignoreCase = true) || fileName.endsWith(".png", ignoreCase = true)) {
                     imageCompressor.compressImage(uri)?.let { compressedFile ->
-                        uploadUri = Uri.fromFile(compressedFile)
+                        finalFile = compressedFile
                         Timber.tag("UPLOAD_VM").d("Image compressed: ${compressedFile.length()} bytes")
                     }
                 }
 
-                // 1. Upload to Storage - collect() ensures single emission per upload
-                storageRepository.uploadFile(uploadUri, fileName).collect { resource ->
+                // If not compressed, copy Uri to local temp file in cache
+                if (finalFile == null) {
+                    finalFile = getFileFromUri(uri, fileName)
+                }
+
+                if (finalFile == null || !finalFile.exists()) {
+                    throw IllegalStateException("Failed to retrieve local file copy from URI")
+                }
+
+                // 2. Direct Multipart Upload to Backend using ProgressRequestBody
+                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                val progressRequestBody = ProgressRequestBody(finalFile, mimeType) { progress ->
+                    _uiState.value = _uiState.value.copy(uploadProgress = progress)
+                }
+                val filePart = MultipartBody.Part.createFormData("file", finalFile.name, progressRequestBody)
+
+                processRepository.uploadFile(filePart).collect { resource ->
                     when (resource) {
                         is Resource.Loading -> {
-                            val progress = resource.data?.toIntOrNull() ?: 0
-                            _uiState.value = _uiState.value.copy(
-                                status = Resource.Loading(),
-                                uploadProgress = progress
-                            )
+                            _uiState.value = _uiState.value.copy(status = Resource.Loading())
                         }
                         is Resource.Success -> {
                             _uiState.value = _uiState.value.copy(uploadProgress = 100)
-                            // 2. Start Processing on Backend
-                            val fileUrl = resource.data
+                            Timber.tag("UPLOAD_VM").i("✅ Multipart upload success: ${resource.data.fileUrl}")
+                            
+                            // Clean up temp file
+                            try {
+                                finalFile.delete()
+                            } catch (e: Exception) {
+                                Timber.tag("UPLOAD_VM").w("Failed to delete temp file: ${e.message}")
+                            }
+
+                            // 3. Start Processing on Backend
                             val request = ProcessRequest(
-                                fileUrl = fileUrl,
-                                fileName = fileName,
+                                fileUrl = resource.data.fileUrl,
+                                fileName = resource.data.fileName,
                                 fileSize = fileSize,
                                 cloudProvider = Constants.DEFAULT_CLOUD_PROVIDER.name.lowercase(),
                                 userEmail = userEmail
@@ -128,6 +154,13 @@ class UploadViewModel @Inject constructor(
                         is Resource.Error -> {
                             Timber.tag("UPLOAD_VM").e(resource.exception, "Upload failed: ${resource.message}")
                             _uiState.value = _uiState.value.copy(status = Resource.Error(resource.exception))
+                            
+                            // Clean up temp file
+                            try {
+                                finalFile.delete()
+                            } catch (e: Exception) {
+                                Timber.tag("UPLOAD_VM").w("Failed to delete temp file: ${e.message}")
+                            }
                         }
                     }
                 }
@@ -146,6 +179,20 @@ class UploadViewModel @Inject constructor(
         } catch (e: Exception) {
             Timber.tag("UPLOAD_VM").e(e, "Backend processing error: ${e.message}")
             _uiState.value = _uiState.value.copy(status = Resource.Error(e))
+        }
+    }
+
+    private fun getFileFromUri(uri: Uri, name: String): File? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri) ?: return null
+            val tempFile = File(context.cacheDir, name)
+            FileOutputStream(tempFile).use { output ->
+                inputStream.copyTo(output)
+            }
+            tempFile
+        } catch (e: Exception) {
+            Timber.tag("UPLOAD_VM").e(e, "Error converting URI to file: ${e.localizedMessage}")
+            null
         }
     }
 

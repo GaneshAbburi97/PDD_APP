@@ -10,7 +10,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9a197cff-8eeb-4638-9859-c49e2364abfc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/network/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/network/ApiService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/network/FirebaseAuthInterceptor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/network/FirebaseAuthInterceptor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/AuthRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/AuthRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/AuthRepositoryImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/AuthRepositoryImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/ProcessRepositoryImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/repository/ProcessRepositoryImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/ui/components/StatusCard.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/ui/components/StatusCard.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/ui/screens/ProcessingScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/ui/screens/ProcessingScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/viewmodel/UploadViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/kotlin/com/medical/fileprocessor/viewmodel/UploadViewModel.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/network_security_config.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/ai/segmentation.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/ai/segmentation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/utils/firebase.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/utils/firebase.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +51,7 @@
       <entry key="chat-panel" value="Claude Haiku 4.5" />
     </selectedModels>
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[PhysicalDevice::serial=R58N60NY9EA]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\prasa\.android\avd\Pixel_6.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />

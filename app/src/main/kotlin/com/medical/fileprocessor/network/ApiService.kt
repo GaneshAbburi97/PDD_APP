@@ -43,10 +43,7 @@ interface ApiService {
         @Part file: MultipartBody.Part
     ): Response<ApiResponse<UploadResponse>>
 
-    /**
-     * Option 2: Notify backend to process a file already in cloud storage
-     */
-    @POST("process")
+    @POST("process/start")
     suspend fun startProcessing(
         @Body request: ProcessRequest
     ): Response<ApiResponse<ProcessResponse>>
@@ -76,14 +73,15 @@ interface ApiService {
 
 data class HealthStatus(
     val status: String,
-    val version: String? = null
+    val version: String? = null,
+    val firebase: String? = null
 )
 
 data class LoginRequest(val email: String, val password: String)
 
 data class RegisterRequest(
-    val email: String, 
-    val password: String, 
+    val email: String,
+    val password: String,
     val displayName: String
 )
 
@@ -96,7 +94,7 @@ data class ProcessRequest(
 )
 
 data class ProcessResponse(
-    val jobId: String, 
+    val jobId: String,
     val estimatedTimeSeconds: Int,
     val status: String
 )
@@ -114,4 +112,3 @@ data class ApiResponse<T>(
     val message: String,
     val data: T? = null
 )
-

@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.medical.fileprocessor.ui.screens.ProcessingScreen
 import com.medical.fileprocessor.ui.screens.UploadScreen
+import com.medical.fileprocessor.ui.screens.ResultScreen
 import com.medical.fileprocessor.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -70,8 +71,27 @@ fun AppNavigation() {
             val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
             ProcessingScreen(
                 jobId = jobId,
-                onProcessingComplete = {
-                    // Handle processing complete if needed
+                onProcessingComplete = { completedJobId ->
+                    navController.navigate(
+                        Constants.ROUTE_RESULT.replace("{jobId}", completedJobId)
+                    ) {
+                        popUpTo(Constants.ROUTE_UPLOAD) { inclusive = false }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Constants.ROUTE_RESULT,
+            arguments = listOf(navArgument("jobId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val jobId = backStackEntry.arguments?.getString("jobId") ?: ""
+            ResultScreen(
+                jobId = jobId,
+                onNavigateBack = {
+                    navController.navigate(Constants.ROUTE_UPLOAD) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
