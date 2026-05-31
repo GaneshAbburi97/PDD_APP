@@ -65,6 +65,11 @@ interface ApiService {
     suspend fun getProcessingResult(
         @Path("jobId") jobId: String
     ): Response<ApiResponse<ProcessingResult>>
+
+    @POST("process/cancel/{jobId}")
+    suspend fun cancelProcessing(
+        @Path("jobId") jobId: String
+    ): Response<ApiResponse<CancelResponse>>
 }
 
 /**
@@ -96,6 +101,11 @@ data class ProcessRequest(
 data class ProcessResponse(
     val jobId: String,
     val estimatedTimeSeconds: Int,
+    val status: String
+)
+
+data class CancelResponse(
+    val jobId: String,
     val status: String
 )
 

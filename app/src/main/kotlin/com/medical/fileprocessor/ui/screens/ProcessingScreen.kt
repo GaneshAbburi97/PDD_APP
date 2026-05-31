@@ -93,7 +93,7 @@ fun ProcessingScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Button(
-                        onClick = { viewModel.cancelJobProcessing() },
+                        onClick = { viewModel.cancelJobProcessing(jobId) },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.errorContainer,
                             contentColor = MaterialTheme.colorScheme.onErrorContainer

@@ -41,6 +41,7 @@ fun ResultScreen(
 
     // Fetch result on entry
     LaunchedEffect(jobId) {
+        viewModel.startListeningToJob(jobId)
         viewModel.fetchResult(jobId)
     }
 

@@ -113,10 +113,20 @@ class ProcessingViewModel @Inject constructor(
     /**
      * Cancels active job processing.
      */
-    fun cancelJobProcessing() {
-        pollingJob?.cancel()
-        _jobStatus.value = Resource.Error(Exception("Job processing cancelled by user"))
-        Timber.tag("PROCESSING_VM").i("❌ Job polling cancelled by user")
+    fun cancelJobProcessing(jobId: String) {
+        viewModelScope.launch {
+            try {
+                repository.cancelProcessing(jobId).collectLatest {
+                    // Backend state transition is authoritative; stop local polling either way.
+                }
+            } catch (e: Exception) {
+                Timber.tag("PROCESSING_VM").w(e, "Cancel request failed for job: $jobId")
+            } finally {
+                pollingJob?.cancel()
+                _jobStatus.value = Resource.Error(Exception("Job processing cancelled by user"))
+                Timber.tag("PROCESSING_VM").i("❌ Job cancelled by user: $jobId")
+            }
+        }
     }
 
     override fun onCleared() {

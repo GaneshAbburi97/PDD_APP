@@ -8,11 +8,17 @@ import time
 import json
 import hashlib
 import subprocess
+import gzip
+from urllib.parse import urlparse
+from urllib.request import urlopen
 from contextlib import asynccontextmanager
+from typing import Dict
 
 import torch
 from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, File, UploadFile, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -29,6 +35,8 @@ from .ai.segmentation import run_inference, cleanup_model
 # Structured JSON Logging Setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("RESEARCH_BACKEND")
+INFERENCE_TIMEOUT_SECONDS = int(os.getenv("INFERENCE_TIMEOUT_SECONDS", "1800"))
+active_job_tasks: Dict[str, asyncio.Task] = {}
 
 class StructuredLoggingMiddleware(BaseHTTPMiddleware):
     """
@@ -99,6 +107,48 @@ def get_git_commit_sha() -> str:
     except Exception:
         return "6d3b4a2c918f0a4a83e0c0c1bcfdf12e0f8de0b1"  # Stable mock commit SHA for fallback
 
+def resolve_public_base_url(request: Request) -> str:
+    configured_base_url = os.getenv("PUBLIC_BASE_URL", "").strip()
+    if configured_base_url:
+        return configured_base_url.rstrip("/")
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    if host:
+        return f"{scheme}://{host}"
+    return str(request.base_url).rstrip("/")
+
+def build_static_url(base_url: str, filename: str) -> str:
+    safe_name = os.path.basename(filename)
+    return f"{base_url}/static/{safe_name}"
+
+def _is_supported_mime(content_type: str | None) -> bool:
+    if not content_type:
+        return True
+    supported = {
+        "application/octet-stream",
+        "application/gzip",
+        "application/x-gzip",
+        "image/nii"
+    }
+    return content_type.lower() in supported
+
+def _is_allowed_file_url(file_url: str, public_base_url: str) -> bool:
+    parsed = urlparse(file_url)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+
+    configured_hosts = {
+        host.strip().lower()
+        for host in os.getenv("ALLOWED_UPLOAD_HOSTS", "").split(",")
+        if host.strip()
+    }
+    public_host = urlparse(public_base_url).netloc.lower()
+    if public_host:
+        configured_hosts.add(public_host)
+    configured_hosts.update({"storage.googleapis.com", "firebasestorage.googleapis.com"})
+
+    return parsed.netloc.lower() in configured_hosts
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -135,6 +185,28 @@ app = FastAPI(
     version="1.1.0-research",
     lifespan=lifespan
 )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "message": str(exc.detail), "data": None}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"success": False, "message": "Validation failed", "data": exc.errors()}
+    )
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled server exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "message": "Internal server error", "data": None}
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -242,30 +314,51 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...), user=Depends(verify_firebase_token)):
+async def upload_file(request: Request, file: UploadFile = File(...), user=Depends(verify_firebase_token)):
     # File Type Checking for HIPAA System Integrity
     if not (file.filename.endswith(".nii") or file.filename.endswith(".nii.gz")):
         raise HTTPException(status_code=400, detail="Invalid file format. Only .nii or .nii.gz are supported.")
+    if not _is_supported_mime(file.content_type):
+        raise HTTPException(status_code=400, detail="Invalid MIME type for NIfTI upload.")
 
     temp_dir = os.path.join(tempfile.gettempdir(), "medical_processor")
     os.makedirs(temp_dir, exist_ok=True)
+    base_url = resolve_public_base_url(request)
 
     # Temporary write to compute SHA-256 checksum and validate size limits
-    temp_path = os.path.join(temp_dir, f"{uuid.uuid4()}_{file.filename}")
+    safe_name = os.path.basename(file.filename)
+    unique_file_name = f"{uuid.uuid4().hex}_{safe_name}"
+    temp_path = os.path.join(temp_dir, unique_file_name)
     try:
         file_size = 0
+        header_probe = bytearray()
         with open(temp_path, "wb") as f:
             while chunk := await file.read(8192):
                 file_size += len(chunk)
                 if file_size > 500 * 1024 * 1024:  # 500MB Size Limit Check
                     raise HTTPException(status_code=413, detail="File size exceeds the maximum limit of 500MB.")
+                if len(header_probe) < 512:
+                    header_probe.extend(chunk[: max(0, 512 - len(header_probe))])
                 f.write(chunk)
+
+        if safe_name.endswith(".nii"):
+            with open(temp_path, "rb") as nifti_file:
+                nifti_header = nifti_file.read(352)
+            if len(nifti_header) < 348 or nifti_header[344:348] not in (b"n+1\x00", b"ni1\x00"):
+                raise HTTPException(status_code=400, detail="Invalid NIfTI file header.")
+        else:
+            if len(header_probe) < 2 or header_probe[0] != 0x1F or header_probe[1] != 0x8B:
+                raise HTTPException(status_code=400, detail="Invalid .nii.gz file signature.")
+            with gzip.open(temp_path, "rb") as gz_file:
+                nifti_header = gz_file.read(352)
+            if len(nifti_header) < 348 or nifti_header[344:348] not in (b"n+1\x00", b"ni1\x00"):
+                raise HTTPException(status_code=400, detail="Invalid compressed NIfTI header.")
 
         input_hash = calculate_sha256(temp_path)
         logger.info(f"🔑 SHA-256 Calculated: {input_hash} for file: {file.filename}")
 
         user_id = user.get("uid", "unknown") if isinstance(user, dict) else user.uid
-        destination_path = f"uploads/{user_id}/{file.filename}"
+        destination_path = f"uploads/{user_id}/{unique_file_name}"
         
         file_url = None
         if firebase_initialized:
@@ -276,9 +369,9 @@ async def upload_file(file: UploadFile = File(...), user=Depends(verify_firebase
 
         if not file_url:
             # Persistent Local Fallback: copy file to static folder so it remains downloadable
-            static_path = os.path.join(temp_dir, file.filename)
+            static_path = os.path.join(temp_dir, unique_file_name)
             shutil.copyfile(temp_path, static_path)
-            file_url = f"http://10.0.2.2:8000/static/{file.filename}"
+            file_url = build_static_url(base_url, unique_file_name)
             logger.info(f"Using local static server URL: {file_url} (retained at: {static_path})")
 
         return {
@@ -286,7 +379,7 @@ async def upload_file(file: UploadFile = File(...), user=Depends(verify_firebase
             "message": "File uploaded successfully",
             "data": {
                 "fileUrl": file_url,
-                "fileName": file.filename,
+                "fileName": safe_name,
                 "fileSize": file_size,
                 "sha256": input_hash
             }
@@ -298,12 +391,17 @@ async def upload_file(file: UploadFile = File(...), user=Depends(verify_firebase
 @app.post("/process")
 @app.post("/process/start")
 async def start_processing(
+    http_request: Request,
     request: ProcessRequest,
     background_tasks: BackgroundTasks,
     user=Depends(verify_firebase_token)
 ):
     job_id = str(uuid.uuid4())
     user_id = user.get("uid", "unknown") if isinstance(user, dict) else user.uid
+    created_at = int(time.time() * 1000)
+    public_base_url = resolve_public_base_url(http_request)
+    if not _is_allowed_file_url(request.fileUrl, public_base_url):
+        raise HTTPException(status_code=400, detail="Unsupported file URL host")
 
     logger.info(f"🚀 Initializing research run {job_id} (user: {user_id})")
 
@@ -319,7 +417,11 @@ async def start_processing(
             "QUEUED",
             0,
             user_id=user_id,
-            file_name=request.fileName
+            user_email=request.userEmail,
+            file_name=request.fileName,
+            input_file_url=request.fileUrl,
+            file_size=request.fileSize,
+            created_at=created_at
         )
         logger.info(f"✅ Job folder established at: {job_dir}")
     except Exception as e:
@@ -331,7 +433,8 @@ async def start_processing(
         job_id,
         request.fileUrl,
         request.fileName,
-        user_id
+        user_id,
+        public_base_url
     )
 
     return {
@@ -350,6 +453,9 @@ async def get_job_status(jobId: str, user=Depends(verify_firebase_token)):
         job_data = get_job_data(jobId)
         if not job_data:
             raise HTTPException(status_code=404, detail="Job not found")
+        user_id = user.get("uid", "unknown") if isinstance(user, dict) else user.uid
+        if job_data.get("userId") != user_id:
+            raise HTTPException(status_code=403, detail="Forbidden")
 
         return {
             "success": True,
@@ -378,10 +484,20 @@ async def get_processing_result(jobId: str, user=Depends(verify_firebase_token))
         job_data = get_job_data(jobId)
         if not job_data:
             raise HTTPException(status_code=404, detail="Job not found")
+        user_id = user.get("uid", "unknown") if isinstance(user, dict) else user.uid
+        if job_data.get("userId") != user_id:
+            raise HTTPException(status_code=403, detail="Forbidden")
 
         status = job_data.get("status", "QUEUED")
         if status != "COMPLETED":
             raise HTTPException(status_code=400, detail=f"Job is not completed. Current status: {status}")
+        created_at = int(job_data.get("createdAt") or 0)
+        updated_at = int(job_data.get("updatedAt", created_at) or created_at)
+        if created_at > 0 and updated_at >= created_at:
+            processing_time_seconds = max(0, (updated_at - created_at) // 1000)
+        else:
+            metadata = job_data.get("metadata") or {}
+            processing_time_seconds = int(int(metadata.get("inference_time_ms", 0)) / 1000) if metadata else 0
 
         return {
             "success": True,
@@ -391,7 +507,7 @@ async def get_processing_result(jobId: str, user=Depends(verify_firebase_token))
                 "status": status,
                 "resultUrl": job_data.get("outputFileUrl", ""),
                 "metadata": job_data.get("metadata", {}),
-                "processingTimeSeconds": 120,
+                "processingTimeSeconds": processing_time_seconds,
                 "fileSize": job_data.get("fileSize", 0)
             }
         }
@@ -401,11 +517,32 @@ async def get_processing_result(jobId: str, user=Depends(verify_firebase_token))
         logger.error(f"❌ Error getting job result: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def process_job(job_id: str, file_url: str, file_name: str, user_id: str):
+@app.post("/process/cancel/{jobId}")
+async def cancel_processing(jobId: str, user=Depends(verify_firebase_token)):
+    job_data = get_job_data(jobId)
+    if not job_data:
+        raise HTTPException(status_code=404, detail="Job not found")
+    user_id = user.get("uid", "unknown") if isinstance(user, dict) else user.uid
+    if job_data.get("userId") != user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    running_task = active_job_tasks.get(jobId)
+    if running_task and not running_task.done():
+        running_task.cancel()
+
+    update_job_status(jobId, "FAILED", 0, error_message="Cancelled by user request")
+    return {
+        "success": True,
+        "message": "Processing cancelled",
+        "data": {"jobId": jobId, "status": "FAILED"}
+    }
+
+async def process_job(job_id: str, file_url: str, file_name: str, user_id: str, public_base_url: str):
     temp_output_file = None
     result_url = None
     start_time = time.time()
     job_dir = os.path.join("data", "jobs", job_id)
+    active_job_tasks[job_id] = asyncio.current_task()
 
     try:
         update_job_status(job_id, "PROCESSING", 10)
@@ -414,25 +551,33 @@ async def process_job(job_id: str, file_url: str, file_name: str, user_id: str):
         # Copy the input file into the deterministic job folder from static server cache if local
         input_dest_path = os.path.join(job_dir, "input", file_name)
         temp_dir = os.path.join(tempfile.gettempdir(), "medical_processor")
-        cached_static_path = os.path.join(temp_dir, file_name)
+        cached_name = os.path.basename(urlparse(file_url).path)
+        normalized_cached_name = cached_name.lower()
+        if not (normalized_cached_name.endswith(".nii") or normalized_cached_name.endswith(".nii.gz")):
+            raise HTTPException(status_code=400, detail="Unsupported source file extension")
+        cached_static_path = os.path.join(temp_dir, cached_name)
+        update_job_status(job_id, "PROCESSING", 25)
 
         if os.path.exists(cached_static_path):
             shutil.copyfile(cached_static_path, input_dest_path)
             input_hash = calculate_sha256(input_dest_path)
         else:
-            # Dummy placeholder file for simulation if file is fully cloud storage
-            with open(input_dest_path, "w") as f:
-                f.write("DUMMY RAW DATA FOR STORAGE INTEGRITY")
+            with urlopen(file_url, timeout=60) as response, open(input_dest_path, "wb") as f:
+                shutil.copyfileobj(response, f)
             input_hash = calculate_sha256(input_dest_path)
 
         logger.info(f"🧠 Running neural network inference for job {job_id}...")
+        update_job_status(job_id, "PROCESSING", 55)
 
         loop = asyncio.get_event_loop()
-        result_data, temp_output_file = await loop.run_in_executor(
-            None,
-            run_inference_blocking,
-            file_url,
-            job_id
+        result_data, temp_output_file = await asyncio.wait_for(
+            loop.run_in_executor(
+                None,
+                run_inference_blocking,
+                input_dest_path,
+                job_id
+            ),
+            timeout=INFERENCE_TIMEOUT_SECONDS
         )
 
         update_job_status(job_id, "PROCESSING", 80)
@@ -450,7 +595,7 @@ async def process_job(job_id: str, file_url: str, file_name: str, user_id: str):
             static_output_path = os.path.join(temp_dir, f"{job_id}_result.nii.gz")
             if os.path.abspath(temp_output_file) != os.path.abspath(static_output_path):
                 shutil.copyfile(temp_output_file, static_output_path)
-            result_url = f"http://10.0.2.2:8000/static/{job_id}_result.nii.gz"
+            result_url = build_static_url(public_base_url, f"{job_id}_result.nii.gz")
 
         runtime_ms = int((time.time() - start_time) * 1000)
         commit_sha = get_git_commit_sha()
@@ -491,10 +636,19 @@ async def process_job(job_id: str, file_url: str, file_name: str, user_id: str):
         )
         logger.info(f"✅ Job {job_id} successfully finalized")
 
+    except asyncio.CancelledError:
+        logger.warning(f"⚠️ Job {job_id} cancelled")
+        try:
+            update_job_status(job_id, "FAILED", 0, error_message="Cancelled by user request")
+        finally:
+            raise
     except Exception as e:
         logger.error(f"❌ Job {job_id} failed: {str(e)}", exc_info=True)
         try:
-            update_job_status(job_id, "FAILED", 0, error_message=str(e))
+            if isinstance(e, asyncio.TimeoutError):
+                update_job_status(job_id, "FAILED", 0, error_message="Inference timed out")
+            else:
+                update_job_status(job_id, "FAILED", 0, error_message=str(e))
         except Exception as update_e:
             logger.error(f"❌ Failed to update job status for {job_id}: {update_e}")
 
@@ -507,12 +661,13 @@ async def process_job(job_id: str, file_url: str, file_name: str, user_id: str):
                     logger.info(f"🧹 Cleaned temp file: {temp_output_file}")
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to clean temp file: {e}")
+        active_job_tasks.pop(job_id, None)
 
-def run_inference_blocking(file_url: str, job_id: str):
+def run_inference_blocking(input_file_path: str, job_id: str):
     import asyncio
     loop = asyncio.new_event_loop()
     try:
-        result = loop.run_until_complete(run_inference(file_url, job_id))
+        result = loop.run_until_complete(run_inference(input_file_path, job_id))
         return result
     finally:
         loop.close()

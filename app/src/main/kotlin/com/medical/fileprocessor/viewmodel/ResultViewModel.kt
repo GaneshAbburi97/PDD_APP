@@ -10,6 +10,7 @@ import com.medical.fileprocessor.repository.ProcessRepositoryImpl
 import com.medical.fileprocessor.util.Resource
 import com.medical.fileprocessor.util.dataOrNull
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,6 +43,7 @@ class ResultViewModel @Inject constructor(
     val isNetworkAvailable: StateFlow<Boolean> = _isNetworkAvailable.asStateFlow()
 
     private var currentJobId: String? = null
+    private var listenerJob: Job? = null
 
     init {
         observeNetwork()
@@ -71,7 +73,8 @@ class ResultViewModel @Inject constructor(
         }
 
         currentJobId = jobId
-        viewModelScope.launch {
+        listenerJob?.cancel()
+        listenerJob = viewModelScope.launch {
             try {
                 (repository as? ProcessRepositoryImpl)?.apply {
                     // Start real-time listener
@@ -102,6 +105,7 @@ class ResultViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        listenerJob?.cancel()
         currentJobId = null
         Timber.tag("RESULT_VM").d("Cleared all listeners and jobs")
     }

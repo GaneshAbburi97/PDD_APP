@@ -9,7 +9,6 @@ import com.medical.fileprocessor.network.ProcessRequest
 import com.medical.fileprocessor.network.ProcessResponse
 import com.medical.fileprocessor.repository.AuthRepository
 import com.medical.fileprocessor.repository.ProcessRepository
-import com.medical.fileprocessor.repository.StorageRepository
 import com.medical.fileprocessor.util.Constants
 import com.medical.fileprocessor.util.ImageCompressor
 import com.medical.fileprocessor.util.ProgressRequestBody
@@ -47,7 +46,6 @@ data class UploadUiState(
  */
 @HiltViewModel
 class UploadViewModel @Inject constructor(
-    private val storageRepository: StorageRepository,
     private val processRepository: ProcessRepository,
     private val authRepository: AuthRepository,
     private val networkManager: NetworkManager,
@@ -85,6 +83,18 @@ class UploadViewModel @Inject constructor(
 
     fun startUploadAndProcess() {
         val uri = _uiState.value.selectedFileUri ?: return
+        val fileName = _uiState.value.fileName ?: "file_${System.currentTimeMillis()}.nii"
+        val normalizedFileName = fileName.lowercase()
+
+        val isSupportedExtension = Constants.SUPPORTED_FILE_EXTENSIONS.any {
+            normalizedFileName.endsWith(".${it.lowercase()}")
+        }
+        val mimeType = context.contentResolver.getType(uri)
+        val isSupportedMime = mimeType == null || Constants.SUPPORTED_MIME_TYPES.contains(mimeType.lowercase())
+        if (!isSupportedExtension || !isSupportedMime) {
+            _uiState.value = _uiState.value.copy(status = Resource.Error(Exception(Constants.ERROR_INVALID_FILE)))
+            return
+        }
         
         // Check size limit for research mode (500MB)
         val fileSize = uri.getFileSize(context)
@@ -93,7 +103,6 @@ class UploadViewModel @Inject constructor(
             return
         }
 
-        val fileName = _uiState.value.fileName ?: "file_${System.currentTimeMillis()}.nii"
         val userEmail = authRepository.getCurrentUser()?.email ?: "guest@medical.com"
 
         viewModelScope.launch {
@@ -119,8 +128,8 @@ class UploadViewModel @Inject constructor(
                 }
 
                 // 2. Direct Multipart Upload to Backend using ProgressRequestBody
-                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
-                val progressRequestBody = ProgressRequestBody(finalFile, mimeType) { progress ->
+                val uploadMimeType = mimeType ?: "application/octet-stream"
+                val progressRequestBody = ProgressRequestBody(finalFile, uploadMimeType) { progress ->
                     _uiState.value = _uiState.value.copy(uploadProgress = progress)
                 }
                 val filePart = MultipartBody.Part.createFormData("file", finalFile.name, progressRequestBody)

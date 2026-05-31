@@ -4,19 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.medical.fileprocessor.ui.screens.LoginScreen
 import com.medical.fileprocessor.ui.screens.ProcessingScreen
+import com.medical.fileprocessor.ui.screens.RegisterScreen
 import com.medical.fileprocessor.ui.screens.UploadScreen
 import com.medical.fileprocessor.ui.screens.ResultScreen
 import com.medical.fileprocessor.util.Constants
+import com.medical.fileprocessor.util.Resource
+import com.medical.fileprocessor.viewmodel.AuthViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -47,11 +60,67 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val authState by authViewModel.uiState.collectAsState()
+    val authError = (authState.authStatus as? Resource.Error)?.message
+
+    if (!authState.isSessionChecked) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.semantics { contentDescription = "Checking authentication session" }
+                )
+            }
+        }
+        return
+    }
+
     NavHost(
         navController = navController,
-        startDestination = Constants.ROUTE_UPLOAD
+        startDestination = if (authState.isLoggedIn) Constants.ROUTE_UPLOAD else Constants.ROUTE_LOGIN
     ) {
+        composable(Constants.ROUTE_LOGIN) {
+            LaunchedEffect(authState.isLoggedIn) {
+                if (authState.isLoggedIn) {
+                    navController.navigate(Constants.ROUTE_UPLOAD) {
+                        popUpTo(Constants.ROUTE_LOGIN) { inclusive = true }
+                    }
+                }
+            }
+            LoginScreen(
+                isLoading = authState.isLoading,
+                errorMessage = authError,
+                onLogin = { email, password -> authViewModel.login(email, password) },
+                onNavigateToRegister = { navController.navigate(Constants.ROUTE_REGISTER) }
+            )
+        }
+
+        composable(Constants.ROUTE_REGISTER) {
+            LaunchedEffect(authState.isLoggedIn) {
+                if (authState.isLoggedIn) {
+                    navController.navigate(Constants.ROUTE_UPLOAD) {
+                        popUpTo(Constants.ROUTE_LOGIN) { inclusive = true }
+                    }
+                }
+            }
+            RegisterScreen(
+                isLoading = authState.isLoading,
+                errorMessage = authError,
+                onRegister = { email, password, displayName ->
+                    authViewModel.register(email, password, displayName)
+                },
+                onNavigateToLogin = { navController.popBackStack() }
+            )
+        }
+
         composable(Constants.ROUTE_UPLOAD) {
+            LaunchedEffect(authState.isLoggedIn) {
+                if (!authState.isLoggedIn) {
+                    navController.navigate(Constants.ROUTE_LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
             UploadScreen(
                 onNavigateToProcessing = { jobId ->
                     navController.navigate(
@@ -59,7 +128,10 @@ fun AppNavigation() {
                     )
                 },
                 onLogout = {
-                    // Handle logout if needed
+                    authViewModel.logout()
+                    navController.navigate(Constants.ROUTE_LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

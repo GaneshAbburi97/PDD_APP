@@ -31,9 +31,9 @@ object Constants {
     // API ENDPOINTS
     // =========================================================================
 
-    const val FIREBASE_API_BASE_URL = "https://us-central1-medical-processor.cloudfunctions.net"
-    const val LOCAL_EMULATOR_API_BASE_URL = "http://10.0.2.2:8000"
-    const val LOCAL_DEVICE_API_BASE_URL = "http://192.168.1.100:8000" // Replace with your local IP
+    const val FIREBASE_API_BASE_URL = "https://us-central1-medical-processor.cloudfunctions.net/"
+    const val LOCAL_EMULATOR_API_BASE_URL = "http://10.0.2.2:8000/"
+    const val LOCAL_DEVICE_API_BASE_URL = "http://192.168.1.100:8000/" // Replace with your local IP
 
     /**
      * Environment selection for API.
@@ -149,7 +149,7 @@ object Constants {
 
     const val ERROR_NO_INTERNET = "No internet connection"
     const val ERROR_INVALID_FILE = "Invalid file format. Please use .nii or .nii.gz"
-    const val ERROR_FILE_TOO_LARGE = "File size exceeds 50 MB limit"
+    const val ERROR_FILE_TOO_LARGE = "File size exceeds 500 MB limit"
     const val ERROR_UPLOAD_FAILED = "File upload failed. Please try again"
     const val ERROR_PROCESSING_FAILED = "Processing failed. Please try again"
     const val ERROR_INVALID_CREDENTIALS = "Invalid email or password"

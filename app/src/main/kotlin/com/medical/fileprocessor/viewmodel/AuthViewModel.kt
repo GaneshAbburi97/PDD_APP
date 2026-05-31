@@ -21,7 +21,8 @@ data class AuthUiState(
     val currentUser: User? = null,
     val isLoading: Boolean = false,
     val authStatus: Resource<User>? = null,
-    val isLoggedIn: Boolean = false
+    val isLoggedIn: Boolean = false,
+    val isSessionChecked: Boolean = false
 )
 
 /**
@@ -55,11 +56,12 @@ class AuthViewModel @Inject constructor(
             _uiState.value = AuthUiState(
                 currentUser = user,
                 isLoggedIn = true,
-                authStatus = Resource.Success(user)
+                authStatus = Resource.Success(user),
+                isSessionChecked = true
             )
             Timber.tag("AUTH_VM").i("✅ Active user session detected: ${user.email}")
         } else {
-            _uiState.value = AuthUiState(isLoggedIn = false)
+            _uiState.value = AuthUiState(isLoggedIn = false, isSessionChecked = true)
             Timber.tag("AUTH_VM").d("No active user session detected")
         }
     }

@@ -4,6 +4,7 @@ import os
 import logging
 import time
 import json
+from datetime import timedelta
 from typing import Optional, Dict, Any
 from fastapi import Header, HTTPException
 
@@ -16,6 +17,9 @@ bucket = None
 
 # Local persistent database path for running without active Firebase credentials
 _local_db_path = os.path.join("data", "local_jobs_db.json")
+
+def _is_auth_bypass_enabled() -> bool:
+    return os.getenv("ALLOW_AUTH_BYPASS", "").lower() in {"1", "true", "yes"}
 
 def _load_local_db() -> Dict[str, Any]:
     if os.path.exists(_local_db_path):
@@ -89,11 +93,13 @@ def initialize_firebase():
 async def verify_firebase_token(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
     """
     Verify Firebase ID token from Authorization header.
-    Supports a mock token bypass when ENVIRONMENT is 'development' or when Firebase is not initialized.
+    Supports a mock token bypass only when ALLOW_AUTH_BYPASS is explicitly enabled.
     """
+    auth_bypass_enabled = _is_auth_bypass_enabled()
+
     if not authorization or not authorization.startswith("Bearer "):
-        if not _initialized or os.getenv("ENVIRONMENT") == "development" or os.getenv("ENVIRONMENT") is None:
-            logger.info("🧪 [MOCK MODE] Missing auth header, returning mock credentials")
+        if auth_bypass_enabled:
+            logger.warning("🧪 [MOCK MODE] Missing auth header, using explicit bypass user")
             return {
                 "uid": "mock_testuser",
                 "email": "testuser@medical.com",
@@ -107,8 +113,8 @@ async def verify_firebase_token(authorization: Optional[str] = Header(None)) -> 
         if not _initialized:
             initialize_firebase()
 
-        if token.startswith("mock-") or token == "test-token":
-            logger.info("🧪 [MOCK MODE] Using test token for auth validation")
+        if (token.startswith("mock-") or token == "test-token") and auth_bypass_enabled:
+            logger.warning("🧪 [MOCK MODE] Using explicit bypass token")
             username = token.replace("mock-", "")
             return {
                 "uid": f"user_{username}",
@@ -117,12 +123,7 @@ async def verify_firebase_token(authorization: Optional[str] = Header(None)) -> 
             }
 
         if not _initialized:
-            logger.warning("⚠️ Firebase not initialized. Bypassing token with mock credentials.")
-            return {
-                "uid": "mock_emulator_user",
-                "email": "emulator@medical.com",
-                "name": "Emulator User"
-            }
+            raise HTTPException(status_code=503, detail="Authentication service unavailable")
 
         decoded_token = auth.verify_id_token(token)
         return decoded_token
@@ -135,8 +136,8 @@ async def verify_firebase_token(authorization: Optional[str] = Header(None)) -> 
         raise HTTPException(status_code=401, detail="Token has expired")
     except Exception as e:
         logger.error(f"❌ Token verification failed: {str(e)}")
-        if not _initialized or os.getenv("ENVIRONMENT") == "development" or os.getenv("ENVIRONMENT") is None:
-            logger.info("🧪 [MOCK MODE] Verification failed, using fallback mock user")
+        if auth_bypass_enabled:
+            logger.warning("🧪 [MOCK MODE] Verification failed, using explicit bypass fallback user")
             return {
                 "uid": "mock_fallback_user",
                 "email": "fallback@medical.com",
@@ -149,7 +150,11 @@ def update_job_status(
     status: str,
     progress: int,
     user_id: Optional[str] = None,
+    user_email: Optional[str] = None,
     file_name: Optional[str] = None,
+    input_file_url: Optional[str] = None,
+    file_size: Optional[int] = None,
+    created_at: Optional[int] = None,
     result_url: Optional[str] = None,
     metadata: Optional[Dict] = None,
     error_message: Optional[str] = None
@@ -168,10 +173,21 @@ def update_job_status(
             "updatedAt": int(time.time() * 1000)
         }
 
+        if status == "QUEUED" and (not user_id or not file_name or not input_file_url):
+            raise ValueError("QUEUED status requires user_id, file_name, and input_file_url during job creation")
+
         if user_id:
             updates["userId"] = user_id
+        if user_email:
+            updates["userEmail"] = user_email
         if file_name:
             updates["fileName"] = file_name
+        if input_file_url:
+            updates["inputFileUrl"] = input_file_url
+        if file_size is not None:
+            updates["fileSize"] = file_size
+        if created_at is not None:
+            updates["createdAt"] = created_at
         if result_url:
             updates["outputFileUrl"] = result_url
         if metadata:
@@ -237,12 +253,10 @@ def upload_result_to_storage(local_path: str, destination_path: str) -> Optional
 
         blob = bucket.blob(destination_path)
         blob.upload_from_filename(local_path)
-
-        blob.make_public()
-        public_url = blob.public_url
+        signed_url = blob.generate_signed_url(version="v4", expiration=timedelta(hours=1), method="GET")
 
         logger.info(f"✅ File uploaded to storage: {destination_path}")
-        return public_url
+        return signed_url
 
     except Exception as e:
         logger.error(f"❌ Failed to upload result: {e}", exc_info=True)

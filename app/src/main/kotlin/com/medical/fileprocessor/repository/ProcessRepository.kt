@@ -36,4 +36,9 @@ interface ProcessRepository {
      * Fetches the detailed results once a job is COMPLETED.
      */
     fun getProcessingResult(jobId: String): Flow<Resource<ProcessingResult>>
+
+    /**
+     * Requests backend cancellation for an active job.
+     */
+    fun cancelProcessing(jobId: String): Flow<Resource<CancelResponse>>
 }

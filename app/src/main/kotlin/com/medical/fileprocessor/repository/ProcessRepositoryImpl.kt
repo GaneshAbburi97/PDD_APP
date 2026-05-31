@@ -1,6 +1,5 @@
 package com.medical.fileprocessor.repository
 
-import com.google.firebase.auth.FirebaseAuth
 import com.medical.fileprocessor.model.ProcessingJob
 import com.medical.fileprocessor.model.ProcessingResult
 import com.medical.fileprocessor.network.*
@@ -28,7 +27,6 @@ import javax.inject.Singleton
 @Singleton
 class ProcessRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val firebaseAuth: FirebaseAuth,
     private val firestoreJobRepository: FirestoreJobRepository
 ) : ProcessRepository {
 
@@ -92,24 +90,7 @@ class ProcessRepositoryImpl @Inject constructor(
             val response = apiService.startProcessing(request)
             if (response.isSuccessful && response.body()?.success == true) {
                 response.body()?.data?.let { processResponse ->
-                    val jobId = processResponse.jobId
-
-                    // Create Firestore job record (non-blocking failure)
-                    try {
-                        val userId = firebaseAuth.currentUser?.uid ?: "unknown"
-                        firestoreJobRepository.createJob(
-                            jobId = jobId,
-                            userId = userId,
-                            fileName = request.fileName,
-                            fileUrl = request.fileUrl
-                        )
-                        Timber.tag("PROCESS").i("✅ Firestore job created: $jobId")
-                    } catch (e: Exception) {
-                        Timber.tag("PROCESS").w(e, "⚠️ Failed to create Firestore job: ${e.localizedMessage}")
-                        // Don't fail the entire flow if Firestore write fails - backend is primary
-                    }
-
-                    Timber.tag("PROCESS").i("✅ Processing started: $jobId")
+                    Timber.tag("PROCESS").i("✅ Processing started: ${processResponse.jobId}")
                     emit(Resource.Success(processResponse))
 
                 } ?: emit(Resource.Error(Exception("Response data is null")))
@@ -185,5 +166,22 @@ class ProcessRepositoryImpl @Inject constructor(
     fun listenToJobStatus(jobId: String): Flow<Resource<ProcessingJob>> {
         Timber.tag("PROCESS").d("👂 Setting up realtime listener for job: $jobId")
         return firestoreJobRepository.listenToJob(jobId)
+    }
+
+    override fun cancelProcessing(jobId: String): Flow<Resource<CancelResponse>> = flow {
+        emit(Resource.Loading())
+        try {
+            val response = apiService.cancelProcessing(jobId)
+            if (response.isSuccessful && response.body()?.success == true) {
+                response.body()?.data?.let {
+                    emit(Resource.Success(it))
+                } ?: emit(Resource.Error(Exception("Cancellation response data is null")))
+            } else {
+                val errorMsg = response.body()?.message ?: "Cancellation failed"
+                emit(Resource.Error(Exception(errorMsg)))
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(e))
+        }
     }
 }
