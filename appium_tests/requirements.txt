@@ -1,0 +1,6 @@
+Appium-Python-Client>=5.0.0
+selenium>=4.26.0
+pytest>=8.0.0
+pytest-xdist>=3.6.0
+openpyxl>=3.1.5
+Faker>=25.0.0

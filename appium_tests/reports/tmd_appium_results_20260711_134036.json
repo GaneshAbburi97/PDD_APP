@@ -1,0 +1,14 @@
+[
+  {
+    "nodeid": "tests/test_05_data_generation.py::test_comprehensive_app_flows[profile_1]",
+    "suite": "test_05_data_generation.py",
+    "test_name": "test_comprehensive_app_flows[profile_1]",
+    "markers": "e2e, parametrize, requires_credentials, tracking",
+    "status": "FAILED",
+    "duration_seconds": 23.063,
+    "stage": "call",
+    "error": "tests\\test_05_data_generation.py:80: in test_comprehensive_app_flows\n    raise e\ntests\\test_05_data_generation.py:66: in test_comprehensive_app_flows\n    home.open_profile_from_header()\npages\\home_page.py:55: in open_profile_from_header\n    self.wait_for_text(\"Edit Profile\")\npages\\base_page.py:38: in wait_for_text\n    return self.wait(timeout).until(ec.visibility_of_element_located(self.by_text(text, contains=contains)))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nC:\\Users\\ganes\\AppData\\Roaming\\Python\\Python314\\site-packages\\selenium\\webdriver\\support\\wait.py:121: in until\n    raise TimeoutException(message, screen, stacktrace)\nE   selenium.common.exceptions.TimeoutException: Message: \nE   Stacktrace:\nE   NoSuchElementError: An element could not be located on the page using the given search parameters.\nE       at AndroidUiautomator2Driver.findElOrEls (C:\\Users\\ganes\\.appium\\node_modules\\appium-uiautomator2-driver\\node_modules\\appium-android-driver\\build\\lib\\commands\\find.js:62:15)\nE       at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\nE       at async AndroidUiautomator2Driver.findElOrElsWithProcessing (C:\\Users\\ganes\\AppData\\Roaming\\npm\\node_modules\\appium\\node_modules\\@appium\\base-driver\\build\\lib\\basedriver\\commands\\find.js:12:16)\nE       at async AndroidUiautomator2Driver.findElement (C:\\Users\\ganes\\AppData\\Roaming\\npm\\node_modules\\appium\\node_modules\\@appium\\base-driver\\build\\lib\\basedriver\\commands\\find.js:28:16)\nE       at async runCommandPromise (C:\\Users\\ganes\\AppData\\Roaming\\npm\\node_modules\\appium\\node_modules\\@appium\\base-driver\\build\\lib\\basedriver\\driver.js:119:24)",
+    "screenshot": "",
+    "timestamp": "2026-07-11T13:40:35"
+  }
+]
