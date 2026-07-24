@@ -273,7 +273,6 @@ private fun categoryColor(category: String): Color = when (category) {
 @Composable
 fun ExerciseScreen(
     viewModel: TmdViewModel,
-    onNavigateToDoctors: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {}
 ) {
@@ -329,18 +328,10 @@ fun ExerciseScreen(
             text = { Text("Your pain level is severe. Professional consultation is strongly recommended.") },
             confirmButton = {
                 Button(
-                    onClick = {
-                        showSevereAlert = false
-                        onNavigateToDoctors()
-                    },
+                    onClick = { showSevereAlert = false },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Consult Doctor")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showSevereAlert = false }) {
-                    Text("Continue Carefully")
+                    Text("Understood")
                 }
             }
         )

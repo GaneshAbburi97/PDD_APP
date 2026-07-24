@@ -104,6 +104,7 @@ fun DownloadReportsScreen(
                                     isGenerating = false
                                     
                                     if (file != null) {
+                                        viewModel.uploadReport(file)
                                         try {
                                             val uri = FileProvider.getUriForFile(
                                                 context,

@@ -379,8 +379,52 @@ class TmdViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun resetPassword(email: String) {
-        // Password reset email delivery needs an SMTP provider before this can send links.
+    fun forgotPassword(email: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                authRepository.forgotPassword(email)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to send reset link")
+            }
+        }
+    }
+
+    fun verifyResetOtp(email: String, otp: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                authRepository.verifyResetOtp(email, otp)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Invalid OTP")
+            }
+        }
+    }
+
+    fun setNewPassword(email: String, newPassword: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                authRepository.resetPassword(email, newPassword)
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Failed to reset password")
+            }
+        }
+    }
+
+    fun uploadReport(file: java.io.File) {
+        viewModelScope.launch {
+            try {
+                val bytes = file.readBytes()
+                val base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                val fileData = "data:application/pdf;filename=${file.name};base64,$base64"
+                
+                val request = com.example.tmdapp.data.remote.ReportUploadRequest(fileData)
+                ApiClient.apiService.uploadReport(request)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun logout() {

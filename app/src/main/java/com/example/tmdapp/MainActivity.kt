@@ -219,8 +219,7 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
             }
             composable(Screen.Exercises.route) {
                 ExerciseScreen(
-                    viewModel = viewModel,
-                    onNavigateToDoctors = { navController.navigate("doctors") }
+                    viewModel = viewModel
                 )
             }
             composable(Screen.Progress.route)  { 
@@ -241,9 +240,7 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
             }
             composable(Screen.Support.route)   {
                 com.example.tmdapp.ui.screens.support.SupportHubScreen(
-                    onNavigateToDoctors = { navController.navigate("doctors") },
-                    onNavigateToHelp = { navController.navigate("help") },
-                    onNavigateToAppointments = { navController.navigate("appointments") }
+                    onNavigateToHelp = { navController.navigate("help") }
                 )
             }
             composable(Screen.Profile.route)   {
@@ -256,8 +253,6 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
                     },
                     onNavigateToSettings = { navController.navigate("settings") },
                     onNavigateToHelp = { navController.navigate("help") },
-                    onNavigateToDoctors = { navController.navigate("doctors") },
-                    onNavigateToAppointments = { navController.navigate("appointments") },
                     onNavigateToHealthReport = { navController.navigate("health_report") },
                     onNavigateToPrivacy = { navController.navigate("privacy_settings") },
                     onNavigateToNotifications = { navController.navigate("notifications") },
@@ -266,7 +261,6 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
                     onNavigateToTroubleshooting = { navController.navigate("troubleshooting") },
                     onNavigateToTerms = { navController.navigate("terms_conditions") },
                     onNavigateToAbout = { navController.navigate("about_app") },
-                    onNavigateToFeedback = { navController.navigate("feedback") },
                     onNavigateToPrivacyPolicy = { navController.navigate("privacy_policy") }
                 )
             }
@@ -277,12 +271,7 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable("feedback") {
-                com.example.tmdapp.ui.screens.support.FeedbackScreen(
-                    viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
+
             composable("settings") {
                 com.example.tmdapp.ui.screens.settings.SettingsScreen(
                     viewModel = viewModel,
@@ -308,41 +297,14 @@ fun MainAppScaffold(viewModel: TmdViewModel) {
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable("doctors") {
-                com.example.tmdapp.ui.screens.support.DoctorsScreen(
-                    viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToBooking = { doctorId -> navController.navigate("book_appointment/$doctorId") },
-                    onNavigateToChat = { doctorId -> navController.navigate("chat/$doctorId") }
-                )
-            }
-            composable("book_appointment/{doctorId}") { backStackEntry ->
-                val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
-                com.example.tmdapp.ui.screens.support.BookingScreen(
-                    viewModel = viewModel,
-                    doctorId = doctorId,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable("chat/{doctorId}") { backStackEntry ->
-                val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
-                com.example.tmdapp.ui.screens.support.ChatScreen(
-                    doctorId = doctorId,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
+
             composable("help") {
                 com.example.tmdapp.ui.screens.support.HelpSupportScreen(
                     viewModel = viewModel,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
-            composable("appointments") {
-                com.example.tmdapp.ui.screens.support.AppointmentsScreen(
-                    viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
+
             composable("notifications") {
                 com.example.tmdapp.ui.screens.NotificationsScreen(
                     viewModel = viewModel,

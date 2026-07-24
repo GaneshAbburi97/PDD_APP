@@ -90,4 +90,47 @@ class AuthRepository {
             e.printStackTrace()
         }
     }
+
+    suspend fun forgotPassword(email: String) {
+        val request = com.example.tmdapp.data.remote.ForgotPasswordRequest(email)
+        try {
+            api.forgotPassword(request)
+        } catch (e: Exception) {
+            throw parseException(e)
+        }
+    }
+
+    suspend fun verifyResetOtp(email: String, otp: String) {
+        val request = com.example.tmdapp.data.remote.VerifyOtpRequest(email, otp)
+        try {
+            api.verifyOtp(request)
+        } catch (e: Exception) {
+            throw parseException(e)
+        }
+    }
+
+    suspend fun resetPassword(email: String, newPassword: String) {
+        val request = com.example.tmdapp.data.remote.ResetPasswordRequest(email, newPassword)
+        try {
+            api.resetPassword(request)
+        } catch (e: Exception) {
+            throw parseException(e)
+        }
+    }
+
+    private fun parseException(e: Exception): Exception {
+        if (e is retrofit2.HttpException) {
+            try {
+                val errorJson = e.response()?.errorBody()?.string()
+                if (errorJson != null) {
+                    val jsonObject = org.json.JSONObject(errorJson)
+                    val message = jsonObject.optString("message", e.message())
+                    return Exception(message)
+                }
+            } catch (ex: Exception) {
+                // Ignore parse errors, return the original
+            }
+        }
+        return e
+    }
 }

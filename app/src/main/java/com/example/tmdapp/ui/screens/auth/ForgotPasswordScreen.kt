@@ -18,7 +18,12 @@ fun ForgotPasswordScreen(
     viewModel: TmdViewModel,
     onNavigateBack: () -> Unit
 ) {
+    var step by remember { mutableIntStateOf(1) }
     var email by remember { mutableStateOf("") }
+    var otp by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    
     var message by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
 
@@ -42,44 +47,148 @@ fun ForgotPasswordScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "Enter your email address to request password reset support.",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email Address") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (message.isNotEmpty()) {
+            if (step == 1) {
                 Text(
-                    text = message,
-                    color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    text = "Enter your email address to receive an OTP for password reset.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email Address") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (message.isNotEmpty()) {
+                    Text(
+                        text = message,
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Button(
+                    onClick = {
+                        if (email.isNotBlank()) {
+                            viewModel.forgotPassword(email, onSuccess = {
+                                message = ""
+                                isError = false
+                                step = 2
+                            }, onError = {
+                                message = it
+                                isError = true
+                            })
+                        } else {
+                            message = "Please enter your email"
+                            isError = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Send OTP")
+                }
+            } else if (step == 2) {
+                Text(
+                    text = "Enter the 6-digit OTP sent to your email.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = otp,
+                    onValueChange = { otp = it },
+                    label = { Text("6-digit OTP") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (message.isNotEmpty()) {
+                    Text(
+                        text = message,
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Button(
+                    onClick = {
+                        if (otp.isNotBlank()) {
+                            viewModel.verifyResetOtp(email, otp, onSuccess = {
+                                message = ""
+                                isError = false
+                                step = 3
+                            }, onError = {
+                                message = it
+                                isError = true
+                            })
+                        } else {
+                            message = "Please enter the OTP"
+                            isError = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Verify OTP")
+                }
+            } else if (step == 3) {
+                Text(
+                    text = "Enter and confirm your new password.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = newPassword,
+                    onValueChange = { newPassword = it },
+                    label = { Text("New Password") },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            }
+                
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = { Text("Confirm Password") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = {
-                    if (email.isNotBlank()) {
-                        viewModel.resetPassword(email)
-                        message = "Password reset email is not configured on this local backend yet."
-                        isError = true
-                    } else {
-                        message = "Please enter your email"
-                        isError = true
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text("Send Reset Link")
+                if (message.isNotEmpty()) {
+                    Text(
+                        text = message,
+                        color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                Button(
+                    onClick = {
+                        if (newPassword == confirmPassword && newPassword.isNotBlank()) {
+                            viewModel.setNewPassword(email, newPassword, onSuccess = {
+                                message = "Password reset successfully!"
+                                isError = false
+                                onNavigateBack()
+                            }, onError = {
+                                message = it
+                                isError = true
+                            })
+                        } else {
+                            message = "Passwords do not match or are empty"
+                            isError = true
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
+                ) {
+                    Text("Reset Password")
+                }
             }
         }
     }

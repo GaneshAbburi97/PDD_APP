@@ -87,6 +87,7 @@ fun HealthReportScreen(
                     IconButton(onClick = {
                         val file = PdfGenerator.generateHealthcareReport(context, currentUser, painRecords, sleepRecords, wellnessRecords, assessmentRecords)
                         if (file != null) {
+                            viewModel.uploadReport(file)
                             val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
                             sharePdf(context, uri)
                             previousReports = getPreviousReports(context)
@@ -97,6 +98,7 @@ fun HealthReportScreen(
                     IconButton(onClick = {
                         val file = PdfGenerator.generateHealthcareReport(context, currentUser, painRecords, sleepRecords, wellnessRecords, assessmentRecords)
                         if (file != null) {
+                            viewModel.uploadReport(file)
                             val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
                             viewPdf(context, uri)
                             previousReports = getPreviousReports(context)

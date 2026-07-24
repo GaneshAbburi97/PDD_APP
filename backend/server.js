@@ -6,8 +6,8 @@ require('dotenv').config();
 const app = express();
 
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files
 app.use('/videos', express.static(path.join(__dirname, 'videos')));
@@ -21,7 +21,7 @@ const sleepRoutes = require('./routes/sleep');
 const exerciseRoutes = require('./routes/exercise');
 const wellnessRoutes = require('./routes/wellness');
 const assessmentRoutes = require('./routes/assessment');
-const appointmentRoutes = require('./routes/appointments');
+const reportsRoutes = require('./routes/reports');
 const feedbackRoutes = require('./routes/feedback');
 const chatRoutes = require('./routes/chat');
 const contactRoutes = require('./routes/contact');
@@ -32,7 +32,7 @@ app.use('/api/sleep', sleepRoutes);
 app.use('/api/exercise', exerciseRoutes);
 app.use('/api/wellness', wellnessRoutes);
 app.use('/api/assessment', assessmentRoutes);
-app.use('/api/appointments', appointmentRoutes);
+app.use('/api/reports', reportsRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/contact', contactRoutes);

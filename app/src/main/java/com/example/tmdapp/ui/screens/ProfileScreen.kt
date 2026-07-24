@@ -42,8 +42,6 @@ fun ProfileScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToHelp: () -> Unit = {},
-    onNavigateToDoctors: () -> Unit = {},
-    onNavigateToAppointments: () -> Unit = {},
     onNavigateToHealthReport: () -> Unit = {},
     onNavigateToPrivacy: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
@@ -52,7 +50,6 @@ fun ProfileScreen(
     onNavigateToTroubleshooting: () -> Unit = {},
     onNavigateToTerms: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
-    onNavigateToFeedback: () -> Unit = {},
     onNavigateToPrivacyPolicy: () -> Unit = {}
 ) {
     val currentUser by viewModel.currentUser.collectAsState()
@@ -333,31 +330,6 @@ fun ProfileScreen(
                         icon = Icons.Default.HelpCenter,
                         title = "Help Center",
                         onClick = onNavigateToHelp
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-                    LinkRow(
-                        icon = Icons.Default.HelpOutline,
-                        title = "FAQs",
-                        onClick = onNavigateToHelp
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-                    LinkRow(
-                        icon = Icons.Default.MedicalServices,
-                        title = "Find a Doctor",
-                        onClick = onNavigateToDoctors
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-                    LinkRow(
-                        icon = Icons.Default.Event,
-                        title = "My Appointments",
-                        onClick = onNavigateToAppointments
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
-
-                    LinkRow(
-                        icon = Icons.Default.Feedback,
-                        title = "Feedback Form",
-                        onClick = onNavigateToFeedback
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.surfaceVariant)
                     LinkRow(

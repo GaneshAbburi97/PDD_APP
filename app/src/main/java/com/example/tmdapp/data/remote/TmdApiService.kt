@@ -65,11 +65,27 @@ interface TmdApiService {
 
     @POST("api/feedback")
     suspend fun submitFeedback(@Body request: FeedbackRequest): FeedbackResponse
+    @POST("api/auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): GenericResponse
+
+    @POST("api/auth/verify-otp")
+    suspend fun verifyOtp(@Body request: VerifyOtpRequest): GenericResponse
+
+    @POST("api/auth/reset-password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest): GenericResponse
+
+    @POST("api/reports/save")
+    suspend fun uploadReport(@Body request: ReportUploadRequest): GenericResponse
 }
 
 data class GoogleLoginRequest(@SerializedName("idToken") val idToken: String)
 data class LoginRequest(val email: String, val password: String)
 data class RegisterRequest(val name: String, val email: String, val password: String)
+data class ForgotPasswordRequest(val email: String)
+data class VerifyOtpRequest(val email: String, val otp: String)
+data class ResetPasswordRequest(val email: String, val newPassword: String)
+data class ReportUploadRequest(val fileData: String)
+data class GenericResponse(val message: String?)
 data class AuthResponse(val token: String, val user: User)
 data class UpdateProfileRequest(
     val name: String,

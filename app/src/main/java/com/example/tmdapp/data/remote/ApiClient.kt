@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
 object ApiClient {
     // Replace with your local machine's IP address if testing on physical device, e.g. "http://192.168.1.100:5000/"
     // Bypass 10.0.2.2 and use the host machine's actual Wi-Fi IP to avoid firewall/routing issues
-    private const val BASE_URL = "http://localhost:5000/" 
+    private const val BASE_URL = "http://10.123.211.234:5000/" 
 
     var authToken: String? = null
 
